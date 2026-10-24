@@ -181,10 +181,10 @@ const STORY = [
     type: "search", image: "marcus-desk.jpg", shot: "Tidy desk with a receipt, a nameplate and a monitor", dark: true,
     prompt: "Marcus's desk. Move your flashlight. Click anything worth a closer look.",
     spots: [
-      { x: 8, y: 56, w: 18, h: 14, label: "Nameplate", text: "MARCUS LUND. Two trading awards on the shelf above it." },
-      { x: 56, y: 18, w: 26, h: 30, label: "Monitor", text: "One sticky note on the screen: 'call mom back.' That's all." },
+      { x: 14, y: 52, w: 16, h: 13, label: "Nameplate", text: "MARCUS LUND. Two trading awards on the shelf above it." },
+      { x: 49, y: 12, w: 36, h: 35, label: "Monitor", text: "Switched off. Just your own reflection in the dark glass." },
       {
-        x: 34, y: 60, w: 16, h: 18, label: "Receipt", key: true,
+        x: 35, y: 64, w: 13, h: 17, label: "Receipt", key: true,
         text: "A receipt. The Night Owl Diner, table 6. Paid Sunday at 2:14 AM. That's across town.",
         clue: "Marcus's receipt: The Night Owl Diner, paid Sunday 2:14 AM, across town.",
       },
@@ -227,12 +227,12 @@ const STORY = [
     type: "search", image: "theo-desk.jpg", shot: "Messy desk, open laptop, drink cans, sticky note", time: "2:20 AM", dark: true,
     prompt: "Theo's desk. Have a look around.",
     spots: [
-      { x: 6, y: 40, w: 16, h: 26, label: "Drink cans", text: "Three empty cans. He was here late on Friday." },
+      { x: 15, y: 40, w: 13, h: 21, label: "Drink cans", text: "Three empty cans. He was here late on Friday." },
       {
-        x: 70, y: 52, w: 16, h: 16, label: "Sticky note", text: "In Theo's handwriting: 'ask Dana why error acct is so full??'",
+        x: 72, y: 59, w: 11, h: 9, label: "Sticky note", text: "In Theo's handwriting: 'ask Dana why error acct is so full??'",
         clue: "Theo's sticky note: 'ask Dana why error acct is so full??'",
       },
-      { x: 32, y: 26, w: 34, h: 40, label: "Laptop", key: true, text: "Still logged in. A query is open in the editor. It never ran." },
+      { x: 37, y: 31, w: 30, h: 38, label: "Laptop", key: true, text: "Still logged in. A query is open in the editor. It never ran." },
     ],
     leave: "Open the laptop",
   },
@@ -371,10 +371,10 @@ const STORY = [
     type: "search", image: "office-inside.jpg", shot: "Inside a private office: desk, monitor, drawer, framed photo", dark: true,
     prompt: "Dana's office. You have a minute, maybe two.",
     spots: [
-      { x: 60, y: 62, w: 18, h: 16, label: "Drawer", text: "Locked." },
-      { x: 10, y: 30, w: 14, h: 20, label: "Framed photo", text: "Dana and Marcus at last year's awards dinner. Both smiling." },
+      { x: 64, y: 62, w: 20, h: 16, label: "Drawer", text: "Locked." },
+      { x: 15, y: 41, w: 9, h: 13, label: "Framed photo", text: "Dana and Marcus at last year's awards dinner. Both smiling." },
       {
-        x: 32, y: 18, w: 30, h: 32, label: "Monitor", key: true,
+        x: 33, y: 27, w: 19, h: 23, label: "Monitor", key: true,
         text: "A personal brokerage login on the screen. Account name: DR Holdings.",
         clue: "Dana's screen: a personal brokerage account called DR Holdings.",
       },
