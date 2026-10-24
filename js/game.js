@@ -27,7 +27,7 @@ const Game = {
   fresh() {
     return {
       i: 0, flags: {}, lost: 0, clock: null, stats: {}, notes: "", pins: [], clues: [], terms: [],
-      learned: [], phone: [], before: null, after: null, endingsSeen: [], started: Date.now(),
+      learned: [], phone: [], unread: {}, before: null, after: null, endingsSeen: [], started: Date.now(),
     };
   },
   save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(this.s)); } catch (e) { /* storage off: no saving */ } },
@@ -41,14 +41,14 @@ const Game = {
   // ---------- main loop ----------
   async run() {
     this.refreshHud();
-    UI.renderPhone(this.s.phone);
+    Phone.init(this);
     while (this.s.i < STORY.length) {
       const b = STORY[this.s.i];
       if (b.when && !b.when(this.s.flags)) { this.s.i++; continue; }
       this.save();
       if (DEV) $("#dev-beat").value = String(this.s.i);
       const r = await this.play(b);
-      if (b.set) Object.assign(this.s.flags, b.set);
+      if (b.set) { Object.assign(this.s.flags, b.set); Phone.render(); }
       if (r && r.jumpTo) this.s.i = STORY.findIndex((x) => x.id === r.jumpTo);
       else this.s.i++;
     }
@@ -89,21 +89,36 @@ const Game = {
     this.save();
   },
   addMessage(m) {
-    this.s.phone.push({ from: m.from || "", text: m.text, me: !!m.me });
-    UI.renderPhone(this.s.phone);
+    const at = this.s.clock === null ? null : this.s.clock + this.s.lost;
+    const msg = { from: m.from || "", text: m.text, me: !!m.me, thread: m.thread, at };
+    this.s.phone.push(msg);
+    Phone.receive(msg);
     m.me ? Sound.key() : Sound.message();
   },
-  async sendMessages(list) {
-    for (const m of list) {
-      if (m.when && !m.when(this.s.flags)) continue;
-      if (!m.me) {
-        UI.typing(m.from);
-        await sleep(Math.min(1500, 450 + m.text.length * 14));
-        UI.typing(null);
-      } else {
+  // The messages in a list that will actually be sent, each with the thread it belongs to.
+  threadMessages(list) {
+    const live = list.filter((m) => !m.when || m.when(this.s.flags));
+    const last = this.s.phone[this.s.phone.length - 1];
+    const threads = assignThreads(live, Phone.current || (last && last.thread) || UNKNOWN);
+    return live.map((m, i) => ({ ...m, thread: threads[i] }));
+  },
+  async sendMessages(msgs) {
+    for (const m of msgs) {
+      if (m.me) {
+        if (Phone.current !== m.thread) Phone.openThread(m.thread);
         await sleep(350);
+        this.addMessage(m);
+        continue;
       }
-      this.addMessage(m);
+      Phone.typing(m.thread);
+      await sleep(Math.min(1500, 450 + m.text.length * 14));
+      Phone.typing(null);
+      const away = !Phone.isShowing(m.thread);
+      this.addMessage(m); // shows a banner when its thread isn't open
+      if (away) {
+        await sleep(1000); // then follow the story into that thread
+        Phone.openThread(m.thread);
+      }
     }
   },
 
@@ -127,12 +142,13 @@ const Game = {
   },
 
   async beat_texts(b) {
-    UI.phoneUp(true);
+    const msgs = this.threadMessages(b.messages);
+    Phone.raise(msgs.length ? msgs[0].thread : null);
     Sound.buzz();
     await sleep(500);
-    await this.sendMessages(b.messages);
+    await this.sendMessages(msgs);
     await this.waitAdvance();
-    UI.phoneUp(false);
+    Phone.lower();
   },
 
   async beat_notify(b) {
@@ -196,10 +212,11 @@ const Game = {
     if (opt.lost) this.loseTime(opt.lost);
     if (opt.remember) UI.toast(opt.remember, 4000);
     if (opt.reply) {
-      UI.phoneUp(true);
-      await this.sendMessages(opt.reply);
+      const msgs = this.threadMessages(opt.reply);
+      Phone.raise(msgs.length ? msgs[0].thread : null);
+      await this.sendMessages(msgs);
       await this.waitAdvance();
-      UI.phoneUp(false);
+      Phone.lower();
     }
     for (const line of opt.lines || []) {
       UI.subtitle(line);
@@ -269,7 +286,6 @@ const Game = {
     });
     $("#btn-notebook").onclick = () => this.s && Notebook.open(this);
     $("#btn-sound").onclick = () => this.toggleMute();
-    $("#phone").onclick = () => { if (!this._advance || !$("#phone").classList.contains("up")) $("#phone").classList.toggle("up"); };
   },
   toggleMute() {
     const muted = Sound.toggleMute();

@@ -75,32 +75,6 @@ const UI = {
     c.hidden = true;
   },
 
-  // ---------- phone ----------
-  phoneUp(up) { $("#phone").classList.toggle("up", up); },
-  renderPhone(log) {
-    const box = $("#phone-log");
-    box.innerHTML = "";
-    let last = null;
-    for (const m of log.slice(-40)) {
-      const who = m.me ? "me" : m.from;
-      if (!m.me && who !== last) box.append(el("div", "msg-from", m.from));
-      box.append(el("div", "msg" + (m.me ? " me" : ""), m.text));
-      last = who;
-    }
-    const t = el("div", "typing");
-    t.id = "typing";
-    t.hidden = true;
-    box.append(t);
-    box.scrollTop = box.scrollHeight;
-  },
-  typing(from) {
-    const t = $("#typing");
-    if (!t) return;
-    t.hidden = !from;
-    t.textContent = from ? `${from} is typing…` : "";
-    $("#phone-log").scrollTop = $("#phone-log").scrollHeight;
-  },
-
   // ---------- notifications, toasts, sticky notes ----------
   notify(title, text) {
     const n = $("#notify");
@@ -233,6 +207,165 @@ const UI = {
     });
   },
 };
+
+// ---------- phone: a Messages app with one thread per contact ----------
+
+// The thread for each message in one list. Your own messages (me: true) go to the nearest
+// other sender in the same list: the one before, or else the one after. to: "Name" overrides.
+function assignThreads(list, fallback) {
+  return list.map((m, i) => {
+    if (m.to) return m.to;
+    if (!m.me) return m.from || fallback;
+    for (let j = i - 1; j >= 0; j--) if (!list[j].me && list[j].from) return list[j].from;
+    for (let j = i + 1; j < list.length; j++) if (!list[j].me && list[j].from) return list[j].from;
+    return fallback;
+  });
+}
+
+const Phone = {
+  game: null,
+  current: null,  // the open thread, or null for the conversation list
+  typingIn: null, // the thread someone is typing in
+  bannerThread: null,
+
+  init(game) {
+    this.game = game;
+    const s = game.s;
+    // Old saves: messages had no thread or time. Sort them into threads now.
+    if (!Array.isArray(s.phone)) s.phone = [];
+    if (s.phone.some((m) => !m.thread)) {
+      const threads = assignThreads(s.phone, UNKNOWN);
+      s.phone.forEach((m, i) => { m.thread ||= threads[i]; if (m.at === undefined) m.at = null; });
+    }
+    if (!s.unread || typeof s.unread !== "object") s.unread = {};
+    this.current = null;
+
+    // Nothing in here may reach the scene: clicks on the phone never advance the story.
+    $("#phone").onclick = (e) => { e.stopPropagation(); if (!this.isUp()) this.raise(); };
+    $("#phone-lower").onclick = (e) => { e.stopPropagation(); e.currentTarget.blur(); this.lower(); };
+    $("#phone-back").onclick = () => this.openThread(null);
+    $("#banner").onclick = (e) => {
+      e.stopPropagation();
+      $("#banner-card").blur();
+      this.hideBanner();
+      this.raise(this.bannerThread);
+    };
+    this.render();
+  },
+
+  isUp() { return $("#phone").classList.contains("up"); },
+  isShowing(thread) { return this.isUp() && this.current === thread; },
+  name(thread) { return thread === UNKNOWN && this.game.s.flags.revealed ? "Marcus (burner)" : thread; },
+
+  raise(thread) {
+    if (thread) this.current = thread;
+    $("#phone").classList.add("up");
+    this.markRead();
+    this.render();
+  },
+  lower() {
+    $("#phone").classList.remove("up");
+    this.render();
+  },
+  openThread(thread) {
+    this.current = thread;
+    if (thread && thread === this.bannerThread && this.isUp()) this.hideBanner();
+    this.markRead();
+    this.render();
+  },
+  // Not saved here: the game saves at the start of each beat, so a Continue never replays
+  // a texts beat on top of messages it already delivered.
+  markRead() {
+    const unread = this.game.s.unread;
+    if (this.isUp() && this.current) delete unread[this.current];
+  },
+
+  // A message was just added to the log.
+  receive(m) {
+    if (!m.me && !this.isShowing(m.thread)) {
+      this.game.s.unread[m.thread] = (this.game.s.unread[m.thread] || 0) + 1;
+      this.banner(m);
+    }
+    this.render();
+  },
+  typing(thread) {
+    this.typingIn = thread;
+    if (this.current) this.render();
+  },
+
+  render() {
+    if (!this.game) return;
+    const s = this.game.s;
+    const total = Object.values(s.unread).reduce((a, n) => a + n, 0);
+    const badge = $("#phone-badge");
+    badge.hidden = !total || this.isUp();
+    badge.textContent = String(total);
+    $("#phone-back").hidden = !this.current;
+    $("#phone-title").textContent = this.current ? this.name(this.current) : "Messages";
+    $("#phone-list").hidden = !!this.current;
+    $("#phone-log").hidden = !this.current;
+    this.current ? this.renderThread() : this.renderList();
+  },
+
+  renderList() {
+    const s = this.game.s;
+    const box = $("#phone-list");
+    box.innerHTML = "";
+    const last = new Map(); // thread -> its newest message, in order of last activity
+    for (const m of s.phone) { last.delete(m.thread); last.set(m.thread, m); }
+    if (!last.size) box.append(el("p", "phone-empty", "No messages yet."));
+    for (const [thread, m] of [...last].reverse()) {
+      const unread = s.unread[thread] || 0;
+      const name = this.name(thread);
+      const row = el("button", "convo" + (unread ? " unread" : ""));
+      row.type = "button";
+      row.setAttribute("aria-label", `${name}${unread ? `, ${unread} unread` : ""}: ${m.text}`);
+      const body = el("span", "convo-body");
+      const top = el("span", "convo-top");
+      top.append(el("span", "convo-name", name), el("span", "convo-time", stamp(m.at)));
+      body.append(top, el("span", "convo-preview", m.text));
+      row.append(el("span", "convo-dot"), el("span", "avatar", initial(name)), body);
+      row.onclick = () => this.openThread(thread);
+      box.append(row);
+    }
+  },
+
+  renderThread() {
+    const box = $("#phone-log");
+    box.innerHTML = "";
+    let lastAt = null;
+    for (const m of this.game.s.phone.filter((x) => x.thread === this.current).slice(-60)) {
+      if (m.at !== null && m.at !== undefined && m.at !== lastAt) {
+        box.append(el("div", "msg-time", stamp(m.at)));
+        lastAt = m.at;
+      }
+      if (!m.me && m.from !== this.current) box.append(el("div", "msg-from", this.name(m.from)));
+      box.append(el("div", "msg" + (m.me ? " me" : ""), m.text));
+    }
+    if (this.typingIn === this.current) box.append(el("div", "msg typing", "typing…"));
+    box.scrollTop = box.scrollHeight;
+  },
+
+  banner(m) {
+    this.bannerThread = m.thread;
+    const name = this.name(m.thread);
+    $("#banner-icon").textContent = initial(name);
+    $("#banner-name").textContent = name;
+    $("#banner-text").textContent = m.text;
+    $("#banner").classList.add("on");
+    Sound.buzz();
+    clearTimeout(this._banner);
+    this._banner = setTimeout(() => this.hideBanner(), 4500);
+  },
+  hideBanner() {
+    clearTimeout(this._banner);
+    $("#banner").classList.remove("on");
+  },
+};
+
+// In-game time of a message, or nothing before the clock starts.
+function stamp(at) { return at === null || at === undefined ? "" : fromMinutes(at); }
+function initial(name) { return name === UNKNOWN ? "?" : name.charAt(0).toUpperCase(); }
 
 // ---------- notebook (press N) ----------
 const Notebook = {

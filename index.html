@@ -46,12 +46,28 @@
 
   <!-- Phone in your hand -->
   <aside id="phone" hidden aria-label="Phone">
+    <span id="phone-badge" hidden aria-label="Unread messages"></span>
     <div class="phone-body">
       <div class="phone-notch"></div>
-      <div class="phone-head">Messages</div>
-      <div id="phone-log" aria-live="polite"></div>
+      <div class="phone-head">
+        <button id="phone-back" type="button" hidden aria-label="Back to conversations">‹</button>
+        <span id="phone-title">Messages</span>
+        <button id="phone-lower" type="button" aria-label="Lower phone">Lower ▾</button>
+      </div>
+      <div id="phone-list"></div>
+      <div id="phone-log" aria-live="polite" hidden></div>
     </div>
   </aside>
+
+  <!-- iOS-style banner for a message in a thread that isn't open -->
+  <div id="banner" role="status">
+    <button id="banner-card" type="button">
+      <span id="banner-icon" class="avatar" aria-hidden="true"></span>
+      <span id="banner-name"></span>
+      <span class="banner-now">now</span>
+      <span id="banner-text"></span>
+    </button>
+  </div>
 
   <div id="notify" role="status">
     <div id="notify-title"></div>
