@@ -101,6 +101,11 @@ const Terminal = {
         if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); run(); return; }
         if (e.key.length === 1) Sound.key();
       };
+      // No pasting or dropping text in: typing it is the lesson. Column clicks still insert.
+      input.onpaste = input.ondrop = (e) => {
+        e.preventDefault();
+        UI.toast("Type it yourself, that's how it sticks.");
+      };
       $("#term-run").onclick = run;
       hintBtn.onclick = () => {
         if (hintLevel >= hints.length) return;

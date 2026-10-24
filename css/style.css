@@ -382,7 +382,7 @@ table.res tbody tr:nth-child(even) td { background: rgba(255, 255, 255, 0.015); 
 .feed-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); margin-right: 8px; vertical-align: 1px; }
 .feed-msg { padding: 10px 12px; border-radius: 12px; background: #1a1f26; font-size: 14px; line-height: 1.45; }
 .feed-msg.warn { background: #2a1f12; color: #fbe3bd; }
-.feed-msg.hint { background: #102522; color: #c7f3ec; font-family: var(--mono); font-size: 13px; }
+.feed-msg.hint { background: #102522; color: #c7f3ec; font-family: var(--mono); font-size: 13px; white-space: pre-line; }
 
 #predict-code { margin: 0; padding: 14px 16px; border-radius: 8px; background: #030605; border: 1px solid #1f2a28; font-family: var(--mono); font-size: 15px; line-height: 1.55; white-space: pre-wrap; }
 #predict-question { font-weight: 600; margin: 4px 0 0; }
