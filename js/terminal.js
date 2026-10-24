@@ -176,6 +176,7 @@ const Terminal = {
     $("#term-label").textContent = b.label || "";
     $("#term-question").textContent = b.question || "";
     $("#term-keywords").textContent = b.keywords ? "Hint: " + b.keywords : "";
+    $("#btn-lesson").hidden = !!b.challenge; // keeps the before/after check fair
     $("#term-keywords").hidden = !b.keywords;
     const tool = $("#term-tool");
     tool.innerHTML = "";

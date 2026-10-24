@@ -167,6 +167,10 @@ const Game = {
     UI.stickyOff();
   },
 
+  async beat_lesson() {
+    await Lesson.open();
+  },
+
   async beat_query(b) {
     if (b.unlock) this.s.flags[b.unlock] = true;
     await Terminal.open(b, this);

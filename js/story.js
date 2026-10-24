@@ -73,6 +73,7 @@ const STORY = [
     ],
   },
   { type: "sticky", term: "Trade", def: "Buying or selling something, like a stock. Every trade the fund makes is one row in the trades table." },
+  { type: "lesson", id: "lesson", title: "How a query works" },
   {
     type: "query", id: "s1", label: "Scene 1 · 11:52 PM", title: "Open the trade records",
     question: "Show everything in the trades table.",
