@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ledger Detective: Night Shift</title>
+  <meta name="description" content="An interactive thriller where you learn to write SQL by hand to catch a rogue trader before the market opens.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- The cinematic frame: the image, darkness, flashlight and subtitles -->
+  <div id="frame">
+    <div id="bg"></div>
+    <div id="placeholder" hidden>
+      <span id="ph-label"></span>
+      <span id="ph-shot"></span>
+    </div>
+    <div id="flashlight" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+    <div id="hotspots" hidden></div>
+    <div id="subtitle" aria-live="polite">
+      <p id="sub-text"></p>
+      <span id="sub-more" hidden>Click or press Space ▸</span>
+    </div>
+    <button id="search-leave" class="btn-primary" type="button" hidden></button>
+  </div>
+
+  <!-- HUD -->
+  <header id="hud" hidden>
+    <div class="hud-left">
+      <span id="clock"></span>
+      <span id="lost"></span>
+      <span class="hud-bell">Market opens 9:30 AM</span>
+    </div>
+    <div class="hud-right">
+      <span class="hud-evidence">Evidence <b id="evidence-count">0</b></span>
+      <button id="btn-notebook" type="button">Notebook <kbd>N</kbd></button>
+      <button id="btn-sound" type="button" aria-pressed="true">Sound on</button>
+    </div>
+  </header>
+
+  <!-- Phone in your hand -->
+  <aside id="phone" hidden aria-label="Phone">
+    <div class="phone-body">
+      <div class="phone-notch"></div>
+      <div class="phone-head">Messages</div>
+      <div id="phone-log" aria-live="polite"></div>
+    </div>
+  </aside>
+
+  <div id="notify" role="status">
+    <div id="notify-title"></div>
+    <div id="notify-text"></div>
+  </div>
+
+  <div id="sticky" role="status">
+    <div class="sticky-kicker">New term</div>
+    <div id="sticky-term"></div>
+    <div id="sticky-def"></div>
+    <div class="sticky-foot">Saved to your notebook</div>
+  </div>
+
+  <div id="toast" role="status"></div>
+
+  <!-- Timed choice -->
+  <div id="choice" hidden>
+    <div class="choice-inner">
+      <div id="choice-speaker"></div>
+      <p id="choice-prompt"></p>
+      <div id="choice-options"></div>
+      <div class="choice-timer"><div id="choice-bar"></div></div>
+    </div>
+  </div>
+
+  <!-- Chapter card -->
+  <div id="chapter" hidden>
+    <div id="chapter-title"></div>
+    <div id="chapter-sub"></div>
+  </div>
+
+  <!-- SQL terminal -->
+  <section id="terminal" hidden aria-label="SQL terminal">
+    <div class="term-window">
+      <div class="term-bar">
+        <span class="term-dots"><i></i><i></i><i></i></span>
+        <span>kestrel_point · risk terminal · read-only</span>
+        <span id="term-clock"></span>
+      </div>
+      <div class="term-body">
+        <aside class="term-side">
+          <h3>Tables</h3>
+          <div id="term-tables"></div>
+          <p class="side-tip">Click a column to type it.</p>
+          <div id="term-tool" class="tool-note"></div>
+        </aside>
+
+        <main class="term-main">
+          <div class="task">
+            <div id="term-label"></div>
+            <p id="term-question"></p>
+            <p id="term-keywords"></p>
+          </div>
+
+          <div id="term-editor">
+            <div class="editor">
+              <span class="prompt">&gt;</span>
+              <textarea id="term-input" rows="4" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Type your SQL query"></textarea>
+            </div>
+            <div class="term-actions">
+              <button id="term-run" class="btn-primary" type="button">Run <kbd>Enter</kbd></button>
+              <button id="term-hint" type="button"></button>
+              <button id="term-skip" type="button"></button>
+              <span class="kbd-tip">Shift + Enter for a new line</span>
+            </div>
+          </div>
+
+          <div id="term-predict" hidden>
+            <pre id="predict-code"></pre>
+            <p id="predict-question"></p>
+            <div id="predict-options"></div>
+            <div id="predict-after" hidden>
+              <button id="predict-continue" class="btn-primary" type="button">Continue ▸</button>
+            </div>
+          </div>
+
+          <div id="term-status"></div>
+          <div id="term-results"></div>
+
+          <div id="term-success" hidden>
+            <div id="success-lines"></div>
+            <div id="pin-row">
+              <label for="pin-note">Pin this query as evidence. What does it prove, in your own words? (optional)</label>
+              <div class="pin-inputs">
+                <input id="pin-note" type="text" autocomplete="off" placeholder="e.g. Only the error account, and it's full">
+                <button id="pin-btn" type="button">Pin as evidence</button>
+              </div>
+            </div>
+            <button id="term-continue" class="btn-primary" type="button">Continue ▸</button>
+          </div>
+        </main>
+
+        <aside class="term-feed">
+          <h3><span class="feed-dot"></span><span id="feed-title">Unknown</span></h3>
+          <div id="term-feed" aria-live="polite"></div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- Report before the final choice -->
+  <div id="report" class="overlay" hidden>
+    <div class="paper">
+      <div class="paper-kicker">Report to Agent Okafor</div>
+      <h2>Evidence</h2>
+      <p id="report-count"></p>
+      <ol id="report-list"></ol>
+      <button id="report-send" class="btn-primary" type="button">Send report ▸</button>
+    </div>
+  </div>
+
+  <!-- Ending card -->
+  <div id="ending" class="overlay" hidden>
+    <div class="ending-inner">
+      <div id="ending-label"></div>
+      <h2 id="ending-title"></h2>
+      <p id="ending-tag"></p>
+      <div class="ending-actions">
+        <button id="ending-retry" type="button">Try the final choice again</button>
+        <button id="ending-next" class="btn-primary" type="button">Continue ▸</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notebook -->
+  <dialog id="notebook" aria-label="Case notebook">
+    <div class="nb-head">
+      <h2>Case notebook</h2>
+      <form method="dialog"><button type="submit">Close <kbd>Esc</kbd></button></form>
+    </div>
+    <div class="nb-grid">
+      <section>
+        <h3>My notes</h3>
+        <label for="nb-notes" class="sr-only">My notes</label>
+        <textarea id="nb-notes" placeholder="Write anything: who you suspect, what doesn't add up…"></textarea>
+        <h3>Clues found</h3>
+        <ul id="nb-clues"></ul>
+      </section>
+      <section>
+        <h3>Evidence (pinned queries)</h3>
+        <div id="nb-evidence"></div>
+      </section>
+      <section>
+        <h3>SQL cheat sheet</h3>
+        <div id="nb-cheat"></div>
+        <h3>Terms</h3>
+        <div id="nb-terms"></div>
+      </section>
+    </div>
+  </dialog>
+
+  <!-- Summary -->
+  <section id="summary" class="overlay" hidden>
+    <div class="paper wide">
+      <div class="paper-kicker">Case closed</div>
+      <h2>Your night, in numbers</h2>
+      <div class="sum-grid">
+        <div><span>Before</span><b id="summary-before"></b></div>
+        <div><span>After</span><b id="summary-after"></b></div>
+        <div><span>Hints used</span><b id="summary-hints"></b></div>
+        <div><span>Endings seen</span><b id="summary-endings"></b></div>
+        <div><span>Time played</span><b id="summary-time"></b></div>
+      </div>
+      <table class="sum-table">
+        <thead><tr><th>Scene</th><th>Tries</th><th>Hints</th><th>Result</th></tr></thead>
+        <tbody id="summary-rows"></tbody>
+      </table>
+      <textarea id="summary-text" hidden aria-label="Results text"></textarea>
+      <div class="ending-actions">
+        <button id="summary-copy" type="button">Copy results</button>
+        <button id="summary-again" class="btn-primary" type="button">Play again</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Title screen -->
+  <section id="title">
+    <div class="title-inner">
+      <div class="title-kicker">An interactive thriller</div>
+      <h1>Ledger Detective</h1>
+      <div class="title-sub">Night Shift</div>
+      <p class="title-pitch">One night. One database. Someone is hiding millions, and the only way to prove who is to write the SQL yourself.</p>
+      <div class="title-actions">
+        <button id="btn-new" class="btn-primary" type="button" disabled>New case</button>
+        <button id="btn-continue" type="button" hidden>Continue</button>
+      </div>
+      <p id="title-status">Loading…</p>
+    </div>
+  </section>
+
+  <!-- Only shown with ?dev in the address: jump to any part of the story -->
+  <select id="dev-beat" hidden aria-label="Jump to beat"></select>
+
+  <script src="js/case-data.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/checker.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/story.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/terminal.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
