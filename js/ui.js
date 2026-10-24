@@ -54,6 +54,7 @@ const UI = {
   // ---------- HUD ----------
   clock(text, lostMin) {
     $("#clock").textContent = text;
+    $("#phone-time").textContent = text.replace(/\s*[AP]M$/, ""); // the status bar drops AM/PM, like iOS
     $("#lost").textContent = lostMin ? `−${lostMin} min` : "";
   },
   evidence(n) { $("#evidence-count").textContent = n; },
@@ -226,7 +227,6 @@ const Phone = {
   game: null,
   current: null,  // the open thread, or null for the conversation list
   typingIn: null, // the thread someone is typing in
-  bannerThread: null,
 
   init(game) {
     this.game = game;
@@ -244,12 +244,13 @@ const Phone = {
     $("#phone").onclick = (e) => { e.stopPropagation(); if (!this.isUp()) this.raise(); };
     $("#phone-lower").onclick = (e) => { e.stopPropagation(); e.currentTarget.blur(); this.lower(); };
     $("#phone-back").onclick = () => this.openThread(null);
-    $("#banner").onclick = (e) => {
-      e.stopPropagation();
-      $("#banner-card").blur();
-      this.hideBanner();
-      this.raise(this.bannerThread);
-    };
+    if (!this._watching) {
+      // The phone also works on top of the SQL terminal.
+      this._watching = true;
+      new MutationObserver(() => this.layout()).observe($("#terminal"), { attributes: true, attributeFilter: ["hidden"] });
+      window.addEventListener("resize", () => this.layout());
+    }
+    this.layout();
     this.render();
   },
 
@@ -260,24 +261,55 @@ const Phone = {
   raise(thread) {
     if (thread) this.current = thread;
     $("#phone").classList.add("up");
+    this.layout();
     this.markRead();
     this.render();
   },
   lower() {
     $("#phone").classList.remove("up");
+    this.layout();
     this.render();
   },
   openThread(thread) {
     this.current = thread;
-    if (thread && thread === this.bannerThread && this.isUp()) this.hideBanner();
     this.markRead();
     this.render();
   },
   // Not saved here: the game saves at the start of each beat, so a Continue never replays
   // a texts beat on top of messages it already delivered.
   markRead() {
-    const unread = this.game.s.unread;
-    if (this.isUp() && this.current) delete unread[this.current];
+    if (!this.isUp() || !this.current) return;
+    delete this.game.s.unread[this.current];
+    this.closeBanners(this.current);
+  },
+
+  // The raised phone always sits in the same spot. While the terminal is open, the terminal
+  // pads its right side so the phone never covers the editor, question or results; it may
+  // overlap the edge of the feed column.
+  layout() {
+    const term = !$("#terminal").hidden;
+    const over = term && this.isUp();
+    document.body.classList.toggle("term-open", term);
+    const terminal = $("#terminal");
+    terminal.style.paddingRight = "";
+    if (!over) return;
+    const W = window.innerWidth;
+    const left = $("#phone").getBoundingClientRect().left; // includes the tilt; translateY doesn't move it sideways
+    if (W > 980) {
+      const cs = getComputedStyle(terminal);
+      const padL = parseFloat(cs.paddingLeft);
+      const base = parseFloat(cs.paddingRight);
+      const feedW = $(".term-feed").getBoundingClientRect().width;
+      const maxW = parseFloat(getComputedStyle($(".term-window")).maxWidth);
+      // The window's right edge may reach this far: the main column ends a feed-width before it.
+      const right = left - 16 + feedW;
+      // The window is centred once max-width caps it, so its right edge moves half as fast as the padding.
+      const pad = right - padL <= maxW ? W - right : W + padL + maxW - 2 * right;
+      if (pad > base) terminal.style.paddingRight = `${Math.ceil(pad)}px`;
+    } else {
+      // One-column terminal: make room beside the phone instead.
+      terminal.style.paddingRight = `${W - left + 12}px`;
+    }
   },
 
   // A message was just added to the log.
@@ -300,11 +332,22 @@ const Phone = {
     const badge = $("#phone-badge");
     badge.hidden = !total || this.isUp();
     badge.textContent = String(total);
-    $("#phone-back").hidden = !this.current;
-    $("#phone-title").textContent = this.current ? this.name(this.current) : "Messages";
-    $("#phone-list").hidden = !!this.current;
-    $("#phone-log").hidden = !this.current;
-    this.current ? this.renderThread() : this.renderList();
+    const inThread = !!this.current;
+    $("#phone-head").className = "phone-head " + (inThread ? "thread" : "list");
+    $("#phone-title").hidden = inThread;
+    $("#phone-back").hidden = !inThread;
+    $("#phone-contact").hidden = !inThread;
+    $("#phone-list").hidden = inThread;
+    $("#phone-log").hidden = !inThread;
+    $("#phone-input").hidden = !inThread;
+    if (inThread) {
+      const name = this.name(this.current);
+      $("#phone-avatar").textContent = initial(name);
+      $("#phone-name").textContent = name;
+      this.renderThread();
+    } else {
+      this.renderList();
+    }
   },
 
   renderList() {
@@ -333,33 +376,69 @@ const Phone = {
   renderThread() {
     const box = $("#phone-log");
     box.innerHTML = "";
+    // A time header starts a new group whenever the in-game time changes.
     let lastAt = null;
-    for (const m of this.game.s.phone.filter((x) => x.thread === this.current).slice(-60)) {
-      if (m.at !== null && m.at !== undefined && m.at !== lastAt) {
-        box.append(el("div", "msg-time", stamp(m.at)));
-        lastAt = m.at;
-      }
+    const items = this.game.s.phone.filter((x) => x.thread === this.current).slice(-60).map((m) => {
+      const header = m.at !== null && m.at !== undefined && m.at !== lastAt;
+      if (header) lastAt = m.at;
+      return { m, header };
+    });
+    let lastMine = -1;
+    items.forEach(({ m }, k) => { if (m.me) lastMine = k; });
+    const typing = this.typingIn === this.current;
+    items.forEach(({ m, header }, k) => {
+      if (header) box.append(el("div", "msg-time", stamp(m.at)));
       if (!m.me && m.from !== this.current) box.append(el("div", "msg-from", this.name(m.from)));
-      box.append(el("div", "msg" + (m.me ? " me" : ""), m.text));
+      // Only the last bubble of a run from the same person gets a tail.
+      const next = items[k + 1];
+      const tail = next ? next.header || next.m.me !== m.me || next.m.from !== m.from : !(typing && !m.me);
+      box.append(el("div", "msg" + (m.me ? " me" : "") + (tail ? " tail" : ""), m.text));
+      if (k === lastMine) box.append(el("div", "msg-receipt", "Delivered"));
+    });
+    if (typing) {
+      const t = el("div", "msg typing tail");
+      t.setAttribute("aria-label", "typing");
+      t.append(el("i"), el("i"), el("i"));
+      box.append(t);
     }
-    if (this.typingIn === this.current) box.append(el("div", "msg typing", "typing…"));
     box.scrollTop = box.scrollHeight;
   },
 
+  // ---------- banners beside the phone ----------
   banner(m) {
-    this.bannerThread = m.thread;
+    const stack = $("#banners");
     const name = this.name(m.thread);
-    $("#banner-icon").textContent = initial(name);
-    $("#banner-name").textContent = name;
-    $("#banner-text").textContent = m.text;
-    $("#banner").classList.add("on");
+    const card = el("button", "banner");
+    card.type = "button";
+    card.dataset.thread = m.thread;
+    card.append(el("span", "avatar", initial(name)), el("span", "banner-name", name), el("span", "banner-now", "now"), el("span", "banner-text", m.text));
+    card.setAttribute("aria-label", `Message from ${name}: ${m.text}`);
+    card.onclick = (e) => { e.stopPropagation(); this.raise(m.thread); };
+    stack.append(card);
+    const max = window.innerWidth > 980 ? 3 : 2;
+    const live = [...stack.children].filter((c) => !c.classList.contains("off"));
+    live.slice(0, Math.max(0, live.length - max)).forEach((c) => this.dropBanner(c));
+    requestAnimationFrame(() => requestAnimationFrame(() => card.classList.add("on")));
+
+    // On screen at least 6 seconds, longer for longer messages. Hovering pauses the timer.
+    let left = Math.min(10000, Math.max(6000, 3000 + m.text.length * 60));
+    let started = 0;
+    const run = () => { started = Date.now(); card._timer = setTimeout(() => this.dropBanner(card), left); };
+    card.onmouseenter = () => { clearTimeout(card._timer); left -= Date.now() - started; };
+    card.onmouseleave = () => { left = Math.max(left, 2000); run(); };
+    run();
     Sound.buzz();
-    clearTimeout(this._banner);
-    this._banner = setTimeout(() => this.hideBanner(), 4500);
   },
-  hideBanner() {
-    clearTimeout(this._banner);
-    $("#banner").classList.remove("on");
+  dropBanner(card) {
+    if (card.classList.contains("off")) return;
+    clearTimeout(card._timer);
+    card.onmouseenter = card.onmouseleave = null;
+    card.classList.remove("on");
+    card.classList.add("off");
+    setTimeout(() => card.remove(), 350);
+  },
+  closeBanners(thread) {
+    for (const c of [...$("#banners").children]) if (c.dataset.thread === thread) this.dropBanner(c);
   },
 };
 

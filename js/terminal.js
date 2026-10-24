@@ -175,7 +175,6 @@ const Terminal = {
     $("#term-status").textContent = "";
     $("#term-success").hidden = true;
     this.renderTables(game);
-    $("#term-clock").textContent = $("#clock").textContent;
     t.hidden = false;
     requestAnimationFrame(() => t.classList.add("on"));
   },

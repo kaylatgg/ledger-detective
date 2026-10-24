@@ -80,7 +80,6 @@ const Game = {
   refreshHud() {
     UI.clock(this.s.clock === null ? "" : fromMinutes(this.s.clock + this.s.lost), this.s.lost);
     UI.evidence(this.s.pins.length);
-    $("#term-clock").textContent = $("#clock").textContent;
   },
   pin(b, sql, note) {
     this.s.pins = this.s.pins.filter((p) => p.id !== b.id);
@@ -368,6 +367,8 @@ async function boot() {
     Game.s = state;
     $("#title").hidden = true;
     $("#hud").hidden = false;
+    // The terminal starts just below the header, however tall it wraps.
+    new ResizeObserver(() => document.documentElement.style.setProperty("--hud-h", `${$("#hud").offsetHeight}px`)).observe($("#hud"));
     $("#phone").hidden = false;
     // restore the last scene image when continuing
     for (let j = Game.s.i; j >= 0; j--) {
