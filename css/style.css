@@ -10,6 +10,13 @@
   --panel: #0e1117;
   --line: #2a2f37;
   --term: #070b0a;
+  /* query parts, after the Okabe-Ito colourblind-safe palette, lightened for the dark terminal */
+  --sql-select: #7cc6f2;
+  --sql-from: #f2a93b;
+  --sql-where: #ece36a;
+  --sql-group: #4fcfa2;
+  --sql-order: #ea94c6;
+  --sql-limit: #b8a8f2;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
   --sans: "IBM Plex Sans", system-ui, -apple-system, Segoe UI, sans-serif;
 }
@@ -356,6 +363,19 @@ body.term-open #phone { z-index: 32; }
   background: #030605; border: 1px solid #1f2a28; font-family: var(--mono); font-size: 16px; line-height: 1.55; caret-color: var(--teal);
 }
 #term-input[readonly] { opacity: 0.75; }
+#term-translate { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; font-size: 14px; line-height: 1.45; }
+.tr-empty { font-size: 13px; color: var(--muted); }
+.tr-part { --c: var(--paper); max-width: 100%; padding: 3px 9px; border-left: 3px solid var(--c); border-radius: 4px; background: rgba(255, 255, 255, 0.04); color: var(--c); overflow-wrap: anywhere; }
+.tr-select { --c: var(--sql-select); }
+.tr-from { --c: var(--sql-from); }
+.tr-where { --c: var(--sql-where); }
+.tr-group, .tr-having { --c: var(--sql-group); }
+.tr-order { --c: var(--sql-order); }
+.tr-limit { --c: var(--sql-limit); }
+.tr-other { --c: var(--muted); }
+.tr-slot { display: inline-block; min-width: 2.4em; padding: 0 4px; border: 1px dashed #4a5552; border-radius: 3px; color: var(--muted); text-align: center; }
+.tr-bad { text-decoration: underline wavy var(--red); text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+.tr-note { font-size: 12px; color: var(--red); }
 .term-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 .kbd-tip { font-size: 12px; color: var(--muted); margin-left: auto; }
 #term-status { font-family: var(--mono); font-size: 13px; min-height: 18px; }

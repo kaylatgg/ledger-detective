@@ -20,6 +20,11 @@ const Terminal = {
       $("#term-feed").innerHTML = "";
       input.value = b.template || "";
       input.readOnly = false;
+      // Live plain-English reading of the query. Hidden in the before/after skills checks.
+      const translate = $("#term-translate");
+      translate.hidden = !!b.challenge;
+      Translate.render(translate, input.value);
+      input.oninput = () => Translate.render(translate, input.value);
 
       const hintBtn = $("#term-hint");
       const hints = b.challenge ? [] : b.hints || [];
@@ -269,4 +274,5 @@ function insertAtCursor(input, text) {
   input.value = input.value.slice(0, start) + text + input.value.slice(end);
   input.selectionStart = input.selectionEnd = start + text.length;
   input.focus();
+  Translate.render($("#term-translate"), input.value); // setting value doesn't fire "input"
 }

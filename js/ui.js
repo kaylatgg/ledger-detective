@@ -298,7 +298,7 @@ const Phone = {
     if (W > 980) {
       const cs = getComputedStyle(terminal);
       const padL = parseFloat(cs.paddingLeft);
-      const base = parseFloat(cs.paddingRight);
+      const base = padL; // the right padding may be mid-transition; the left always matches its resting value
       const feedW = $(".term-feed").getBoundingClientRect().width;
       const maxW = parseFloat(getComputedStyle($(".term-window")).maxWidth);
       // The window's right edge may reach this far: the main column ends a feed-width before it.
