@@ -41,8 +41,18 @@ const Terminal = {
       skipBtn.textContent = b.challenge ? "I don't know yet" : "Skip this";
 
       const say = (text, kind = "") => {
+        const feed = $("#term-feed");
+        const last = feed.lastElementChild;
+        // The same message again (e.g. Enter on an empty editor): pulse it instead of stacking a copy.
+        if (last && last.textContent === text) {
+          last.classList.remove("pulse");
+          void last.offsetWidth; // restart the animation
+          last.classList.add("pulse");
+          last.scrollIntoView({ block: "nearest" });
+          return;
+        }
         const m = el("div", "feed-msg " + kind, text);
-        $("#term-feed").append(m);
+        feed.append(m);
         m.scrollIntoView({ block: "nearest" });
       };
       if (b.challenge === "before") say("No hints for this one. Just try. It's fine to skip.");

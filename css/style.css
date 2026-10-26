@@ -342,13 +342,15 @@ body.term-open #phone { z-index: 32; }
 .term-side, .term-feed { overflow-y: auto; padding: 16px; }
 .term-side { border-right: 1px solid #1f2a28; }
 .term-feed { border-left: 1px solid #1f2a28; }
+/* keep the last hint scrollable above the phone that peeks up from the bottom */
+body.term-open .term-feed { padding-bottom: 120px; scroll-padding-bottom: 120px; }
 .term-side h3, .term-feed h3 { margin: 0 0 10px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .tbl { margin-bottom: 14px; }
 .tbl-name { font-family: var(--mono); font-size: 14px; color: var(--teal); margin-bottom: 6px; }
 .tbl-cols { display: flex; flex-wrap: wrap; gap: 4px; }
 .col { min-height: 30px; padding: 3px 8px; font-family: var(--mono); font-size: 12px; border-radius: 6px; background: rgba(45, 212, 191, 0.06); border-color: #1f3a35; }
 .side-tip { font-size: 12px; color: var(--muted); margin: 0 0 16px; }
-.side-btn { width: 100%; margin: 0 0 16px; min-height: 36px; font-size: 13px; background: rgba(45, 212, 191, 0.06); border-color: #1f3a35; color: var(--teal); }
+.lesson-btn { width: 100%; margin: 0 0 16px; min-height: 36px; font-size: 13px; background: rgba(45, 212, 191, 0.06); border-color: #1f3a35; color: var(--teal); }
 .tool-note { background: #f5d76e; color: #2a2410; padding: 12px 14px; transform: rotate(-1deg); font-size: 13px; line-height: 1.45; }
 .tool-note p { margin: 0 0 6px; }
 .tool-note p:last-child { margin: 0; }
@@ -403,6 +405,8 @@ table.res tbody tr:nth-child(even) td { background: rgba(255, 255, 255, 0.015); 
 .feed-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); margin-right: 8px; vertical-align: 1px; }
 .feed-msg { padding: 10px 12px; border-radius: 12px; background: #1a1f26; font-size: 14px; line-height: 1.45; }
 .feed-msg.warn { background: #2a1f12; color: #fbe3bd; }
+.feed-msg.pulse { animation: feed-pulse 0.4s ease-out; }
+@keyframes feed-pulse { 0% { box-shadow: 0 0 0 2px var(--teal); filter: brightness(1.5); } 100% { box-shadow: 0 0 0 2px transparent; filter: none; } }
 .feed-msg.hint { background: #102522; color: #c7f3ec; font-family: var(--mono); font-size: 13px; white-space: pre-line; }
 
 #predict-code { margin: 0; padding: 14px 16px; border-radius: 8px; background: #030605; border: 1px solid #1f2a28; font-family: var(--mono); font-size: 15px; line-height: 1.55; white-space: pre-wrap; }
