@@ -40,11 +40,14 @@ kbd { font-family: var(--mono); font-size: 11px; padding: 1px 5px; border-radius
 
 /* ---------- cinematic frame ---------- */
 #frame {
-  position: fixed; inset: 0; margin: auto;
-  width: min(100vw, 177.78vh); height: min(100vh, 56.25vw);
+  position: fixed; inset: 0;
   overflow: hidden; background: #000; cursor: pointer;
   --mx: 50%; --my: 55%;
 }
+/* Always 16:9 like the images, so hotspot percentages line up; covers the window, cropping the overflow. */
+#stage { position: absolute; left: 50%; top: 50%; width: max(100vw, 177.78vh); height: max(100vh, 56.25vw); transform: translate(-50%, -50%); }
+/* Tall screens (phones held upright): fit instead of cover, so hotspots at the sides aren't cropped off. */
+@media (max-aspect-ratio: 4/3) { #stage { width: min(100vw, 177.78vh); height: min(100vh, 56.25vw); } }
 #bg {
   position: absolute; inset: -3%;
   background: center / cover no-repeat;

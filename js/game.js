@@ -401,7 +401,7 @@ function setupDev() {
     location.reload();
   };
   $("#frame").addEventListener("click", (e) => {
-    const r = $("#frame").getBoundingClientRect();
+    const r = $("#stage").getBoundingClientRect();
     const x = (((e.clientX - r.left) / r.width) * 100).toFixed(1);
     const y = (((e.clientY - r.top) / r.height) * 100).toFixed(1);
     UI.toast(`x: ${x}, y: ${y}`);

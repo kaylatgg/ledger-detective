@@ -24,15 +24,17 @@
 
   <!-- The cinematic frame: the image, darkness, flashlight and subtitles -->
   <div id="frame">
-    <div id="bg"></div>
-    <div id="placeholder" hidden>
-      <span id="ph-label"></span>
-      <span id="ph-shot"></span>
+    <div id="stage">
+      <div id="bg"></div>
+      <div id="placeholder" hidden>
+        <span id="ph-label"></span>
+        <span id="ph-shot"></span>
+      </div>
+      <div id="hotspots" hidden></div>
     </div>
     <div id="flashlight" aria-hidden="true"></div>
     <div class="vignette" aria-hidden="true"></div>
     <div class="grain" aria-hidden="true"></div>
-    <div id="hotspots" hidden></div>
     <div id="subtitle" aria-live="polite">
       <p id="sub-text"></p>
       <span id="sub-more" hidden>Click or press Space ▸</span>
