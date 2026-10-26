@@ -8,7 +8,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <script>
+    // Cache-busting: fresh files on every reload while developing locally, a fixed version when published.
+    window.ASSET_V = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === "file:" ? String(Date.now()) : "1";
+    (() => {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "css/style.css?v=" + ASSET_V;
+      link.setAttribute("blocking", "render"); // like a normal <link>: no flash of unstyled page
+      document.head.appendChild(link);
+    })();
+  </script>
 </head>
 <body>
 
@@ -297,15 +307,14 @@
   <!-- Only shown with ?dev in the address: jump to any part of the story -->
   <select id="dev-beat" hidden aria-label="Jump to beat"></select>
 
-  <script src="js/case-data.js"></script>
-  <script src="js/db.js"></script>
-  <script src="js/checker.js"></script>
-  <script src="js/sound.js"></script>
-  <script src="js/story.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/translate.js"></script>
-  <script src="js/lesson.js"></script>
-  <script src="js/terminal.js"></script>
-  <script src="js/game.js"></script>
+  <script>
+    // Same order as before; async = false makes them run one after another.
+    for (const name of ["case-data", "db", "checker", "sound", "story", "ui", "translate", "lesson", "terminal", "game"]) {
+      const s = document.createElement("script");
+      s.src = "js/" + name + ".js?v=" + window.ASSET_V;
+      s.async = false;
+      document.body.appendChild(s);
+    }
+  </script>
 </body>
 </html>
