@@ -7,7 +7,7 @@
   <meta name="description" content="An interactive thriller where you learn to write SQL by hand to catch a rogue trader before the market opens.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
   <script>
     // Cache-busting: fresh files on every reload while developing locally, a fixed version when published.
     window.ASSET_V = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === "file:" ? String(Date.now()) : "1";
@@ -35,9 +35,11 @@
     <div id="flashlight" aria-hidden="true"></div>
     <div class="vignette" aria-hidden="true"></div>
     <div class="grain" aria-hidden="true"></div>
+    <div class="bar bar-top" aria-hidden="true"></div>
+    <div class="bar bar-bottom" aria-hidden="true"></div>
     <div id="subtitle" aria-live="polite">
       <p id="sub-text"></p>
-      <span id="sub-more" hidden>Click or press Space ▸</span>
+      <span id="sub-more" hidden>Click or press Space</span>
     </div>
     <button id="search-leave" class="btn-primary" type="button" hidden></button>
   </div>
@@ -47,7 +49,7 @@
     <div class="hud-left">
       <span id="clock"></span>
       <span id="lost"></span>
-      <span class="hud-bell">Market opens 9:30 AM</span>
+      <span class="hud-bell">Market opens 09:30</span>
     </div>
     <div class="hud-right">
       <span class="hud-evidence">Evidence <b id="evidence-count">0</b></span>
@@ -135,8 +137,8 @@
   <section id="terminal" hidden aria-label="SQL terminal">
     <div class="term-window">
       <div class="term-bar">
-        <span class="term-dots"><i></i><i></i><i></i></span>
-        <span>kestrel_point · risk terminal · read-only</span>
+        <span>Kestrel Point · Risk terminal</span>
+        <span>Read-only</span>
       </div>
       <div class="term-body">
         <aside class="term-side">
@@ -181,6 +183,12 @@
           <div id="term-results"></div>
 
           <div id="term-success" hidden>
+            <!-- Reward: the solved query becomes an exhibit, stamped as evidence -->
+            <div id="ev-card" class="ev-card" aria-hidden="true">
+              <span id="ev-card-kicker" class="ev-card-kicker"></span>
+              <strong id="ev-card-title"></strong>
+              <span class="ev-card-stamp">Evidence</span>
+            </div>
             <div id="success-lines"></div>
             <div id="pin-row">
               <label for="pin-note">Pin this query as evidence. What does it prove, in your own words? (optional)</label>
@@ -219,8 +227,9 @@
 
   <div id="report" class="overlay" hidden>
     <div class="paper">
+      <div class="stamp" aria-hidden="true">Evidence</div>
       <div class="paper-kicker">Report to Agent Okafor</div>
-      <h2>Evidence</h2>
+      <h2>Report of findings</h2>
       <p id="report-count"></p>
       <ol id="report-list"></ol>
       <button id="report-send" class="btn-primary" type="button">Send report ▸</button>
@@ -293,16 +302,23 @@
 
   <!-- Title screen -->
   <section id="title">
+    <div class="title-bg" aria-hidden="true"></div>
     <div class="title-inner">
-      <div class="title-kicker">An interactive thriller</div>
-      <h1>Ledger Detective</h1>
-      <div class="title-sub">Night Shift</div>
-      <p class="title-pitch">One night. One database. Someone is hiding millions, and the only way to prove who is to write the SQL yourself.</p>
+      <div class="title-kicker">Kestrel Point Capital · Floor 3 · Sunday 23:40</div>
+      <h1>Ledger<br>Detective</h1>
+      <div class="title-line">
+        <span class="title-sub">Night Shift</span>
+        <p class="title-pitch">Someone is hiding millions in the books. The only way to prove who is to write the SQL yourself.</p>
+      </div>
       <div class="title-actions">
-        <button id="btn-new" class="btn-primary" type="button" disabled>New case</button>
+        <button id="btn-new" class="btn-primary" type="button" disabled>Begin the shift</button>
         <button id="btn-continue" type="button" hidden>Continue</button>
       </div>
       <p id="title-status">Loading…</p>
+    </div>
+    <div class="title-count">
+      <span>Market opens in</span>
+      <b>09:50:00</b>
     </div>
   </section>
 

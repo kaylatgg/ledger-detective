@@ -183,7 +183,7 @@ const Terminal = {
 
   show(b, game) {
     const t = $("#terminal");
-    $("#term-label").textContent = b.label || "";
+    $("#term-label").textContent = to24(b.label || "");
     $("#term-question").textContent = b.question || "";
     $("#term-keywords").textContent = b.keywords ? "Hint: " + b.keywords : "";
     $("#btn-lesson").hidden = !!b.challenge; // keeps the before/after check fair
@@ -260,6 +260,17 @@ const Terminal = {
     lines.forEach((l) => out.append(el("p", "", l)));
     const canPin = !b.challenge && b.pin !== false;
     $("#pin-row").hidden = !canPin;
+    // Reward: the solved query becomes an exhibit. The card slides in and gets stamped.
+    const card = $("#ev-card");
+    card.hidden = !canPin;
+    if (canPin) {
+      $("#ev-card-kicker").textContent = "Exhibit " + (game.s.pins.filter((p) => p.id !== b.id).length + 1);
+      $("#ev-card-title").textContent = b.title || "";
+      card.classList.remove("in");
+      void card.offsetWidth; // restart the animation
+      card.classList.add("in");
+      Sound.stamp(0.35);
+    }
     const note = $("#pin-note");
     note.value = "";
     const pinBtn = $("#pin-btn");
@@ -269,6 +280,7 @@ const Terminal = {
       game.pin(b, sql.trim(), note.value.trim());
       pinBtn.textContent = "Pinned ✓";
       pinBtn.disabled = true;
+      UI.flyToEvidence(card);
     };
     box.hidden = false;
     $("#term-continue").onclick = onContinue;

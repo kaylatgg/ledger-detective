@@ -9,6 +9,11 @@ function el(tag, cls, text) {
   return e;
 }
 
+// The bank's systems use 24-hour time: "11:40 PM" becomes "23:40". The phone keeps 12-hour time, like iOS.
+function to24(text) {
+  return String(text).replace(/(\d{1,2}):(\d{2})\s*(AM|PM)/gi, (_, h, m, ap) => `${String((parseInt(h, 10) % 12) + (ap.toUpperCase() === "PM" ? 12 : 0)).padStart(2, "0")}:${m}`);
+}
+
 const UI = {
   sceneToken: 0,
 
@@ -53,11 +58,42 @@ const UI = {
 
   // ---------- HUD ----------
   clock(text, lostMin) {
-    $("#clock").textContent = text;
+    $("#clock").textContent = to24(text);
     $("#phone-time").textContent = text.replace(/\s*[AP]M$/, ""); // the status bar drops AM/PM, like iOS
     $("#lost").textContent = lostMin ? `−${lostMin} min` : "";
   },
-  evidence(n) { $("#evidence-count").textContent = n; },
+  evidence(n) {
+    const count = $("#evidence-count");
+    const before = this._evidence;
+    this._evidence = n;
+    count.textContent = n;
+    // Reward: the counter ticks up when new evidence is pinned (not when a saved game loads).
+    if (before !== undefined && n > before) {
+      count.classList.remove("bump");
+      void count.offsetWidth; // restart the animation
+      count.classList.add("bump");
+    }
+  },
+  // Reward: a copy of the exhibit card flies up into the Evidence counter.
+  flyToEvidence(card) {
+    if (!card || card.hidden || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const from = card.getBoundingClientRect();
+    const to = $("#evidence-count").getBoundingClientRect();
+    const fly = card.cloneNode(true);
+    fly.removeAttribute("id");
+    fly.querySelectorAll("[id]").forEach((x) => x.removeAttribute("id"));
+    fly.classList.remove("in");
+    fly.classList.add("ev-fly");
+    Object.assign(fly.style, { left: from.left + "px", top: from.top + "px", width: from.width + "px" });
+    document.body.append(fly);
+    const dx = to.left + to.width / 2 - (from.left + from.width / 2);
+    const dy = to.top + to.height / 2 - (from.top + from.height / 2);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      fly.style.transform = `translate(${dx}px, ${dy}px) scale(0.08) rotate(-12deg)`;
+      fly.style.opacity = "0";
+    }));
+    setTimeout(() => fly.remove(), 700);
+  },
 
   // ---------- chapter cards ----------
   async chapter(title, sub, big) {

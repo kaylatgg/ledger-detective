@@ -75,6 +75,7 @@ const Sound = {
   key() { this.tone(2200 + Math.random() * 600, 0.02, { type: "square", vol: 0.012 }); },
   success() { this.tone(523, 0.25, { vol: 0.08 }); this.tone(659, 0.25, { vol: 0.08, delay: 0.1 }); this.tone(784, 0.5, { vol: 0.08, delay: 0.2 }); },
   error() { this.tone(196, 0.25, { type: "sawtooth", vol: 0.04 }); },
+  stamp(delay = 0) { this.tone(95, 0.14, { type: "triangle", vol: 0.35, delay }); this.tone(190, 0.05, { type: "square", vol: 0.03, delay }); }, // rubber stamp thud
   sting() { this.tone(55, 2.5, { type: "sawtooth", vol: 0.12, attack: 0.02 }); this.tone(58, 2.5, { type: "sawtooth", vol: 0.1 }); },
   step(delay = 0) { this.tone(70, 0.18, { type: "triangle", vol: 0.25, delay }); },
   footsteps(n = 6, gap = 0.55) { for (let i = 0; i < n; i++) this.step(i * gap); },
