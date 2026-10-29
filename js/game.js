@@ -189,7 +189,7 @@ const Game = {
     await UI.search(b, (clue) => {
       if (!this.s.clues.includes(clue)) {
         this.s.clues.push(clue);
-        UI.toast("Added to your notebook (N)");
+        UI.toast("Clue added to your notebook · press N to see");
       }
     });
     $("#frame").classList.remove("still");
@@ -300,7 +300,7 @@ const Game = {
   },
   toggleMute() {
     const muted = Sound.toggleMute();
-    $("#btn-sound").textContent = muted ? "Sound off" : "Sound on";
+    $("#sound-label").textContent = muted ? "Sound off" : "Sound on";
     $("#btn-sound").setAttribute("aria-pressed", String(!muted));
   },
 };

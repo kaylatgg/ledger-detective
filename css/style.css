@@ -153,6 +153,15 @@ kbd { font-family: var(--mono); font-size: 11px; padding: 0 4px; border-radius: 
   animation: blink 1.6s ease-in-out infinite;
 }
 @keyframes blink { 50% { opacity: 0.35; } }
+/* The same bottom strip for every instruction: choices, searching, chapter cards */
+.bar-help {
+  position: absolute; left: 0; right: 0; bottom: 0; height: var(--bar); margin: 0;
+  display: flex; align-items: center; justify-content: center; padding: 0 var(--gutter); text-align: center;
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ash);
+  pointer-events: none;
+}
+.bar-help.blink { animation: blink 1.6s ease-in-out infinite; }
+#search-help { z-index: 1; }
 
 #hotspots { position: absolute; inset: 0; }
 .spot {
@@ -243,7 +252,9 @@ body.term-open #phone { z-index: 32; }
   border-radius: 10px 10px 0 0; border: 1px solid #3a3d44; border-bottom: 0; background: rgba(20, 22, 26, 0.92);
   color: var(--bone); font-size: 12px; white-space: nowrap;
 }
-#phone:not(.up) #phone-lower { display: none; }
+/* when the phone is down, the tab invites you to open it */
+#phone:not(.up) #phone-lower { background: var(--ink); border-color: var(--bone); }
+#phone:not(.up) #phone-lower:hover { color: var(--signal); border-color: var(--signal); }
 #phone-badge {
   position: absolute; top: -8px; left: 22px; z-index: 2; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 12px;
   background: var(--alarm-fill); color: #fff; font-size: 13px; font-weight: 700; line-height: 24px; text-align: center; transform: rotate(3deg);
@@ -377,12 +388,8 @@ body.term-open #phone { z-index: 32; }
   background: linear-gradient(transparent 30%, rgba(0, 0, 0, 0.85)); opacity: 0; transition: opacity 0.3s;
 }
 #choice.on { opacity: 1; }
-/* the instruction lives in the bottom bar */
-#choice::after {
-  content: "Press a number \00B7  No answer is an answer";
-  position: fixed; left: var(--gutter); bottom: 0; height: var(--bar); display: flex; align-items: center;
-  font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ash);
-}
+/* how to answer lives in the bottom strip (#choice-help, a .bar-help) */
+#choice-help { position: fixed; z-index: 1; }
 .choice-inner { position: relative; z-index: 1; width: min(1200px, calc(100vw - 2 * var(--gutter))); padding-bottom: calc(var(--bar) + 5vh); }
 /* The hiding scene: darkness closes in from the edges over the length of the timer */
 #choice.closing::before {
@@ -773,7 +780,7 @@ tr.lit-where .pick { border-color: var(--literal); color: var(--literal); }
   #report h2, #summary h2 { padding-right: 0; }
   .sum-compare, .sum-skills { grid-template-columns: minmax(0, 1fr); }
   .sum-side + .sum-side { padding-left: 0; border-left: 0; border-top: 1px solid var(--manila); }
-  #choice::after { display: none; }
+  #choice-help, #search-help { font-size: 11px; letter-spacing: 0.08em; }
   #hud { font-size: 11px; padding: 0 12px; }
   #clock { font-size: 18px; }
   #hud button { padding: 0 8px; font-size: 11px; }
@@ -783,7 +790,7 @@ tr.lit-where .pick { border-color: var(--literal); color: var(--literal); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #bg.in, .grain, .spot, #sub-more, .msg.typing i, .feed-msg.pulse, .ev-card.in, .ev-card.in .ev-card-stamp, #evidence-count.bump { animation: none !important; }
+  #bg.in, .grain, .spot, #sub-more, .bar-help.blink, .msg.typing i, .feed-msg.pulse, .ev-card.in, .ev-card.in .ev-card-stamp, #evidence-count.bump { animation: none !important; }
   #frame.shock, #frame.shock::after, #clock.jolt, #choice.closing::before, #bg-old.out { animation: none !important; }
   #chapter-title .ch { animation: none !important; opacity: 1; }
 }

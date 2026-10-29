@@ -40,9 +40,10 @@
     <div class="bar bar-bottom" aria-hidden="true"></div>
     <div id="subtitle" aria-live="polite">
       <p id="sub-text"></p>
-      <span id="sub-more" hidden>Click or press Space</span>
+      <span id="sub-more" hidden>Click or press Space to continue</span>
     </div>
     <button id="search-leave" class="btn-primary" type="button" hidden></button>
+    <p id="search-help" class="bar-help" hidden></p>
   </div>
 
   <!-- HUD -->
@@ -55,13 +56,13 @@
     <div class="hud-right">
       <span class="hud-evidence">Evidence <b id="evidence-count">0</b></span>
       <button id="btn-notebook" type="button">Notebook <kbd>N</kbd></button>
-      <button id="btn-sound" type="button" aria-pressed="true">Sound on</button>
+      <button id="btn-sound" type="button" aria-pressed="true"><span id="sound-label">Sound on</span> <kbd>M</kbd></button>
     </div>
   </header>
 
   <!-- Phone in your hand -->
   <aside id="phone" hidden aria-label="Phone">
-    <button id="phone-lower" type="button">▾ Lower</button>
+    <button id="phone-lower" type="button">▴ Open phone</button>
     <span id="phone-badge" hidden aria-label="Unread messages"></span>
     <span class="side-btn left action" aria-hidden="true"></span>
     <span class="side-btn left vol-up" aria-hidden="true"></span>
@@ -126,12 +127,14 @@
       <div id="choice-options"></div>
       <div class="choice-timer"><div id="choice-bar"></div></div>
     </div>
+    <p id="choice-help" class="bar-help"></p>
   </div>
 
   <!-- Chapter card -->
   <div id="chapter" hidden>
     <div id="chapter-title"></div>
     <div id="chapter-sub"></div>
+    <span id="chapter-more" class="bar-help blink" hidden>Click or press Space to continue</span>
   </div>
 
   <!-- SQL terminal -->

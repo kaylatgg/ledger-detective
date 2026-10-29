@@ -69,7 +69,11 @@ const UI = {
     $("#sub-text").textContent = text || "";
     box.classList.toggle("on", !!text);
   },
-  more(on) { $("#sub-more").hidden = !on; },
+  // "Click or press Space to continue": under the scene, and on chapter cards too.
+  more(on) {
+    $("#sub-more").hidden = !on;
+    $("#chapter-more").hidden = !on;
+  },
 
   // ---------- HUD ----------
   clock(text, lostMin) {
@@ -77,7 +81,7 @@ const UI = {
     const hhmm = to24(text);
     clock.textContent = hhmm;
     $("#phone-time").textContent = text.replace(/\s*[AP]M$/, ""); // the status bar drops AM/PM, like iOS
-    $("#lost").textContent = lostMin ? `−${lostMin} min` : "";
+    $("#lost").textContent = lostMin ? `−${lostMin} min lost` : "";
     // Clock pressure: losing minutes jolts the clock (not when a saved game loads).
     if (this._lost !== undefined && lostMin > this._lost) {
       clock.classList.remove("jolt");
@@ -192,6 +196,10 @@ const UI = {
       const box = $("#choice");
       // The hiding scene: the screen closes in as the timer runs out.
       box.classList.toggle("closing", !!closeIn);
+      // Spell out how to answer, and what happens if you don't.
+      const keys = options.map((_, i) => i + 1);
+      const keyText = keys.length > 1 ? `${keys.slice(0, -1).join(", ")} or ${keys[keys.length - 1]}` : "1";
+      $("#choice-help").textContent = `Click an answer or press ${keyText} · If time runs out, that counts as your answer`;
       box.style.setProperty("--secs", seconds + "s");
       $("#choice-speaker").textContent = speaker || "";
       $("#choice-prompt").textContent = prompt;
@@ -240,6 +248,10 @@ const UI = {
       const leave = $("#search-leave");
       leave.hidden = true;
       leave.textContent = (b.leave || "Move on") + " ▸";
+      // Tell the player what to do here, in the bottom strip.
+      const help = $("#search-help");
+      help.textContent = "Click anything in the room to look closer";
+      help.hidden = false;
       let found = false;
       for (const s of b.spots) {
         const btn = el("button", "spot");
@@ -253,7 +265,11 @@ const UI = {
           UI.subtitle(s.text);
           Sound.key();
           if (s.clue) onClue(s.clue);
-          if (s.key && !found) { found = true; leave.hidden = false; }
+          if (s.key && !found) {
+            found = true;
+            leave.hidden = false;
+            help.textContent = "You found something important · Keep looking, or move on when you're ready";
+          }
         };
         layer.append(btn);
       }
@@ -261,6 +277,7 @@ const UI = {
         e.stopPropagation();
         layer.hidden = true;
         leave.hidden = true;
+        help.hidden = true;
         UI.subtitle("");
         resolve();
       };
@@ -333,7 +350,8 @@ const Phone = {
 
     // Nothing in here may reach the scene: clicks on the phone never advance the story.
     $("#phone").onclick = (e) => { e.stopPropagation(); if (!this.isUp()) this.raise(); };
-    $("#phone-lower").onclick = (e) => { e.stopPropagation(); e.currentTarget.blur(); this.lower(); };
+    // The tab on top of the phone: "Open phone" when it's down, "Lower" when it's up.
+    $("#phone-lower").onclick = (e) => { e.stopPropagation(); e.currentTarget.blur(); this.isUp() ? this.lower() : this.raise(); };
     $("#phone-back").onclick = () => this.openThread(null);
     if (!this._watching) {
       // The phone also works on top of the SQL terminal.
@@ -352,12 +370,14 @@ const Phone = {
   raise(thread) {
     if (thread) this.current = thread;
     $("#phone").classList.add("up");
+    $("#phone-lower").textContent = "▾ Lower";
     this.layout();
     this.markRead();
     this.render();
   },
   lower() {
     $("#phone").classList.remove("up");
+    $("#phone-lower").textContent = "▴ Open phone";
     this.layout();
     this.render();
   },
@@ -543,7 +563,7 @@ const Notebook = {
   announce(b) {
     if (!b.id) return;
     const names = PEOPLE.filter((p) => p.at === b.id || (p.updates || []).some((u) => u.at === b.id)).map((p) => p.name);
-    if (names.length) UI.toast(`Who's who updated: ${names.join(", ")} (N)`, 3600);
+    if (names.length) UI.toast(`Who's who updated: ${names.join(", ")} · press N to see`, 3600);
   },
 
   open(game) {
