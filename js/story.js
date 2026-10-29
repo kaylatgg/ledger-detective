@@ -18,6 +18,28 @@ const UNKNOWN = "Unknown";
 const DANA = "Dana Reyes";
 const THEO = "Theo Kim";
 
+// Who's who in the case notebook. Every name and job title is there from the start.
+// Each note appears the moment the player reaches the beat with that id ("at"),
+// and a toast says the notebook was updated. No "at" = known from the start.
+// Keep these spoiler-free: they say what the player already knows, nothing more.
+const PEOPLE = [
+  { name: "You", role: "Junior risk analyst · three weeks in", note: "Working the night shift at Kestrel Point. Secretly helping the FBI." },
+  { name: "Agent Okafor", role: "FBI · your contact", note: "Running the case from outside the building. Texts you as Okafor (FBI)." },
+  {
+    name: "Unknown", role: "A number you don't know", at: "unknown",
+    note: "Someone texting you tips. Knows the office a little too well.",
+    updates: [{ at: "reveal", text: "It was Marcus, on a burner phone." }],
+  },
+  { name: "Priya", role: "Senior trader · limit 50,000", at: "s1", note: "One of the fund's biggest traders." },
+  { name: "Theo Kim", role: "Intern · limit 5,000", at: "theo", note: "New, like you. Asked about the error account on Friday." },
+  { name: "Marcus Lund", role: "Trader · limit 10,000", at: "s3", note: "His name is on the trades parked in the error account." },
+  {
+    name: "Dana Reyes", role: "Head of trading · your boss · limit 100,000", at: "dana-texts",
+    note: "Says she's been home all weekend. Offered to help.",
+    updates: [{ at: "badge", text: "Badge log: on Floor 3 at 4:12 AM." }],
+  },
+];
+
 const STORY = [
   // ---------- BEFORE ----------
   { type: "chapter", title: "Before you go in", sub: "FBI field office · Sunday, 9:00 PM" },
@@ -65,7 +87,7 @@ const STORY = [
     lines: ["Your terminal can read the fund's trade database.", "Tonight, that's your only weapon."],
   },
   {
-    type: "texts",
+    type: "texts", id: "unknown",
     messages: [
       { from: UNKNOWN, text: "you're the new risk analyst. right?" },
       { from: UNKNOWN, text: "don't reply. just listen." },
@@ -103,7 +125,7 @@ const STORY = [
     success: ["Cleaner. Names and amounts.", "Most of it looks normal. You just don't know where to look yet."],
   },
   {
-    type: "texts",
+    type: "texts", id: "theo",
     messages: [
       { from: THEO, text: "wait r u at the office rn?? it says ur logged in lol" },
       { from: THEO, text: "random q. do u know what the error account is" },
@@ -281,7 +303,7 @@ const STORY = [
     success: ["Two traders: Marcus and Priya.", "WHERE filters rows. HAVING filters totals."],
   },
   {
-    type: "texts",
+    type: "texts", id: "dana-texts",
     messages: [
       { from: DANA, text: "rookie. you're on the trade system at 3am?" },
       { from: DANA, text: "good. someone should be. I've had a bad feeling about Marcus for weeks." },
@@ -314,7 +336,7 @@ const STORY = [
     type: "scene", image: "hallway.jpg", shot: "Long corridor, one light on at the far end", time: "4:12 AM", dark: true, flicker: true,
     lines: ["4:12 AM. The floor is silent.", "Then, behind you, a beep."],
   },
-  { type: "notify", title: "Badge reader · Floor 3 east", text: "Dana R. clocked in at 4:12 AM", sound: "beep", shock: true },
+  { type: "notify", id: "badge", title: "Badge reader · Floor 3 east", text: "Dana R. clocked in at 4:12 AM", sound: "beep", shock: true },
   {
     type: "scene", image: "elevator-lit.jpg", shot: "Same lobby as lobby.jpg, lights on", sound: "ding", shock: true,
     lines: ["The elevator lights are on.", "Footsteps. Coming your way."],
@@ -459,7 +481,7 @@ const STORY = [
     success: ["dana.r: 286,000.", "Same trades. Same total. Different name.", "Dana typed in every one of them, under Marcus's name."],
   },
   {
-    type: "texts", set: { revealed: true },
+    type: "texts", id: "reveal", set: { revealed: true },
     messages: [
       { from: UNKNOWN, text: "now you see it." },
       { from: UNKNOWN, text: "it was never me." },

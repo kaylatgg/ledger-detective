@@ -693,7 +693,15 @@ tr.lit-where .pick { border-color: var(--literal); color: var(--literal); }
 .nb-head button { border-color: var(--type); color: var(--type); font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
 .nb-head button:hover:not(:disabled) { border-color: var(--stamp); color: var(--stamp); }
 .nb-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; padding: 20px 24px 28px; }
-.nb-grid h3 { font-family: var(--document); font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faded); margin: 0 0 10px; }
+.nb-grid h3, .nb-people h3 { font-family: var(--document); font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faded); margin: 0 0 10px; }
+/* Who's who: a strip of people across the top of the notebook */
+.nb-people { padding: 20px 24px 0; }
+#nb-people { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0 24px; }
+.nb-person { display: flex; flex-direction: column; gap: 2px; padding: 8px 0 12px; border-top: 1px solid var(--manila); font-size: 14px; line-height: 1.4; }
+.nb-person strong { font-size: 15px; }
+.nb-role { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faded); margin-bottom: 2px; }
+.nb-unknown { color: var(--faded); font-style: italic; }
+.nb-update { margin-top: 4px; font-family: var(--voice); font-size: 15px; font-style: italic; color: var(--pen); }
 .nb-grid h3 ~ h3 { margin-top: 24px; }
 #nb-notes { width: 100%; min-height: 200px; resize: vertical; padding: 12px; border-radius: 0; border: 1px solid var(--manila); background: var(--paper); color: var(--pen); font-family: var(--voice); line-height: 1.5; font-size: 16px; }
 #nb-clues { padding-left: 18px; margin: 0; font-size: 14px; line-height: 1.5; }

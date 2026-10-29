@@ -539,9 +539,30 @@ function initial(name) { return name === UNKNOWN ? "?" : name.charAt(0).toUpperC
 
 // ---------- notebook (press N) ----------
 const Notebook = {
+  // When a beat introduces someone (or adds to their note), say so with a toast.
+  announce(b) {
+    if (!b.id) return;
+    const names = PEOPLE.filter((p) => p.at === b.id || (p.updates || []).some((u) => u.at === b.id)).map((p) => p.name);
+    if (names.length) UI.toast(`Who's who updated: ${names.join(", ")} (N)`, 3600);
+  },
+
   open(game) {
     const s = game.s;
     const d = $("#notebook");
+
+    // Who's who: every name and job title from the start; each note appears once its scene is reached.
+    const people = $("#nb-people");
+    people.innerHTML = "";
+    const reached = (id) => !id || STORY.findIndex((x) => x.id === id) <= s.i;
+    for (const p of PEOPLE) {
+      const item = el("div", "nb-person");
+      item.append(el("strong", "", p.name), el("span", "nb-role", p.role));
+      item.append(reached(p.at) ? el("span", "", p.note) : el("span", "nb-unknown", "Not met yet."));
+      for (const u of p.updates || []) {
+        if (reached(u.at)) item.append(el("span", "nb-update", u.text));
+      }
+      people.append(item);
+    }
     $("#nb-notes").value = s.notes || "";
     $("#nb-notes").oninput = (e) => { s.notes = e.target.value; game.save(); };
 

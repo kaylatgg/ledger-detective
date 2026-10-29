@@ -47,6 +47,7 @@ const Game = {
       if (b.when && !b.when(this.s.flags)) { this.s.i++; continue; }
       this.save();
       if (DEV) $("#dev-beat").value = String(this.s.i);
+      Notebook.announce(b);
       const r = await this.play(b);
       if (b.set) { Object.assign(this.s.flags, b.set); Phone.render(); }
       if (r && r.jumpTo) this.s.i = STORY.findIndex((x) => x.id === r.jumpTo);
