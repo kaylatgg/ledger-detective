@@ -1,66 +1,57 @@
 # Ledger Detective: Night Shift
 
-An interactive thriller that teaches you to write SQL by hand. You're an undercover FBI agent on the night shift at an investment fund. Someone is hiding millions in losses, and the only way to prove who is to query the fund's database yourself before the market opens at 9:30 AM.
+**Play it here: https://kaylatgg.github.io/ledger-detective/**
 
-**Player:** a Business of Art & Design student heading into fintech who has only ever coded with AI.
-**Learns:** `SELECT`, `FROM`, `WHERE`, `AND`, `ORDER BY`, `LIMIT`, `SUM`, `GROUP BY` (and `HAVING` as a bonus).
+An interactive thriller where you learn SQL by writing it yourself.
 
-## Run it
+It's Sunday, 11:40 PM, on Floor 3 of Kestrel Point Capital, a fund that looks after two billion dollars. You're a junior risk analyst three weeks into the job, and secretly you're helping the FBI. Someone on your floor is hiding millions in losses. You have until the market opens at 9:30 AM to find out who, and the only tool you have is the fund's trade database.
 
-**In WebStorm:** open this folder, open `index.html`, and click the browser icon in the top-right corner of the editor.
+About 30 minutes. Best with headphones. Works in any modern browser on a laptop or desktop.
 
-**Without WebStorm:** double-click `index.html`. It works as long as you're online, since the SQL engine loads from the internet.
+## How to play
 
-## Add the images
+- **Click or press Space** to move the story forward.
+- **Write SQL in the terminal** and press **Enter** to run it. Shift + Enter adds a new line. You type every query yourself; pasting is turned off, because typing is how it sticks.
+- **Stuck?** Press **Hint**. The first hint is free. After that, each hint costs 5 minutes on the clock.
+- **Answer timed choices** by clicking or pressing **1**, **2** or **3**. If time runs out, that counts as your answer.
+- **Search rooms** by clicking anything that looks worth a closer look.
+- **Check your phone.** Texts arrive during the night. Click the phone to open it.
+- **Press N** for your case notebook: who's who, clues, pinned evidence, terms and an SQL cheat sheet.
+- **Press M** to turn the sound on or off.
 
-Generate the 11 images with an AI image tool (the prompts are in the Image Prompts doc) and save them in the `images/` folder with exactly these names. Until an image exists, the game shows a dark placeholder naming the image that goes there.
+Your progress saves automatically in your browser, so you can close the tab and continue later.
 
-`lobby.jpg` · `floor.jpg` · `desk.jpg` · `marcus-desk.jpg` · `theo-desk.jpg` · `hallway.jpg` · `elevator-lit.jpg` · `office-door.jpg` · `office-inside.jpg` · `window-dawn.jpg` · `floor-morning.jpg`
+## What you'll learn
 
-## Line up the clickable spots on your images
+No coding experience needed. A short interactive lesson at the start shows how a query works, and every query you type is translated into plain English as you write it.
 
-Three scenes have spots to click: Marcus's desk, Theo's desk and Dana's office. To place them on your images:
-
-1. Add `?dev` to the end of the address, e.g. `index.html?dev`
-2. Use the menu in the bottom-left corner to jump to a `search` beat
-3. Click the middle of the object in your image. A message shows its position, e.g. `x: 34.5, y: 61.2`
-4. In `js/story.js`, set that spot's `x` and `y` to the top-left corner, and `w` and `h` to its width and height (all in % of the screen)
-
-The dev menu also jumps to any scene, which is handy for testing.
-
-## Change the story
-
-Everything the player reads is in `js/story.js`: narration, texts, questions, hints, choices and endings. Each query has an `answer`. The game runs the player's query and the answer, then compares the results, so any correct way of writing it passes.
-
-To change the case data (names, amounts, times), edit `data/build_case.py`, then run:
-
-```
-python3 data/build_case.py    # rebuilds data/case.sql and js/case-data.js
-python3 data/check_case.py    # confirms every clue in the story is still in the data
-```
-
-## Files
-
-| File | What it does |
+| Skill | What it does |
 | --- | --- |
-| `index.html` | The page |
-| `css/style.css` | The look: darkness, film grain, flashlight, phone, terminal |
-| `js/story.js` | **The whole story.** Edit this one most |
-| `js/game.js` | Plays the story in order, the clock, saving, the end summary |
-| `js/terminal.js` | The SQL terminal: editor, results, hints, pinning evidence |
-| `js/checker.js` | Checks answers and explains mistakes |
-| `js/ui.js` | Phone, choices, searching images, notebook |
-| `js/db.js` | Loads the SQL engine and the case database |
-| `js/sound.js` | Sound effects, generated in code |
-| `js/case-data.js` | The case database (generated, don't edit) |
-| `data/` | Scripts that build and check the case database |
+| `SELECT … FROM` | Choose which columns to show, from which table |
+| `WHERE` | Keep only the rows that match |
+| `AND` | Match two conditions at once |
+| `ORDER BY … DESC`, `LIMIT` | Sort the results and keep the top few |
+| `SUM`, `GROUP BY` | Add up totals for each person or group |
+| `HAVING` | Filter those totals (optional bonus scene) |
 
-## Put it online (GitHub Pages)
+When a query is wrong, the game explains the specific mistake in plain words, such as a missing comma, missing quotes or the wrong order, instead of just saying "error". You also get the same skills check at the start and the end of the night, so you can see how far you came.
 
-1. Create a repository on GitHub and push this folder to it (WebStorm: **Git → GitHub → Share Project on GitHub**).
-2. On GitHub: **Settings → Pages → Source: Deploy from a branch → main / root → Save**.
-3. After a minute your game is live at `https://<your-username>.github.io/<repository-name>/`.
+## Features
 
-## Playtesting
+- Four endings, decided by what you find and the choices you make
+- A case notebook that fills in as the night goes on
+- Evidence you pin yourself, in your own words, and send in a final report
+- An end screen that shows what you learned: your before and after answers, every skill you used, and the mistakes you fixed
 
-The last screen shows the player's results: the before/after challenge, tries and hints per scene, and every mistake they made. Click **Copy results** and paste it into your playtest notes.
+## Made with
+
+Plain HTML, CSS and JavaScript, with no frameworks and no build step. The SQL runs in your browser with [sql.js](https://github.com/sql-js/sql.js) (SQLite compiled to WebAssembly), so nothing you type is sent anywhere. Every sound is generated in code. Full credits are in [CREDITS.md](CREDITS.md).
+
+Made by Kayla Tang for CTEC 200: Innovation and Coding, Ringling College of Art and Design, Fall 2026.
+
+## Run it on your own computer
+
+Download or clone this repository, then either:
+
+- double-click `index.html` (you'll need an internet connection, because the SQL engine and fonts load online), or
+- run `python3 -m http.server` in this folder and open http://localhost:8000 (the SQL engine then loads from the `lib/` folder).
