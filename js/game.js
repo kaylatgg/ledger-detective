@@ -72,6 +72,16 @@ const Game = {
 
   // ---------- clock & evidence ----------
   setClock(t) { this.s.clock = toMinutes(t); this.refreshHud(); },
+  // Story text can say {time} (the clock right now), {soon} (a few minutes from now, before the bell)
+  // or {left} (minutes until the bell). Lost minutes move the clock, so this keeps the words matching it.
+  fill(text) {
+    if (!text || this.s.clock === null) return text;
+    const now = this.s.clock + this.s.lost;
+    return String(text)
+      .replace(/\{time\}/g, fromMinutes(now))
+      .replace(/\{soon\}/g, fromMinutes(Math.min(now + 3, BELL - 1)))
+      .replace(/\{left\}/g, String(Math.max(0, BELL - now)));
+  },
   loseTime(min) {
     const before = this.s.lost;
     this.s.lost = Math.min(MAX_LOST, this.s.lost + min);
@@ -155,7 +165,7 @@ const Game = {
   async beat_notify(b) {
     if (b.shock) UI.shock();
     if (b.sound) Sound[b.sound]();
-    UI.notify(b.title, b.text);
+    UI.notify(b.title, this.fill(b.text));
     await sleep(500);
     await this.waitAdvance();
     UI.notify(null);

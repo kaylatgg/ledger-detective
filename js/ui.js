@@ -66,6 +66,7 @@ const UI = {
 
   subtitle(text) {
     const box = $("#subtitle");
+    if (text && typeof Game !== "undefined" && Game.s) text = Game.fill(text); // times in the story match the clock
     $("#sub-text").textContent = text || "";
     box.classList.toggle("on", !!text);
   },

@@ -36,7 +36,7 @@ const PEOPLE = [
   {
     name: "Dana Reyes", role: "Head of trading · your boss · limit 100,000", at: "dana-texts",
     note: "Says she's been home all weekend. Offered to help.",
-    updates: [{ at: "badge", text: "Badge log: on Floor 3 at 4:12 AM." }],
+    updates: [{ at: "badge", text: "Badge log: on Floor 3 tonight." }],
   },
 ];
 
@@ -97,7 +97,7 @@ const STORY = [
   { type: "sticky", term: "Trade", def: "Buying or selling something, like a stock. Every trade the fund makes is one row in the trades table." },
   { type: "lesson", id: "lesson", title: "How a query works" },
   {
-    type: "query", id: "s1", label: "Scene 1 · 11:52 PM", title: "Open the trade records",
+    type: "query", id: "s1", label: "Scene 1 · {time}", title: "Open the trade records",
     question: "Show everything in the trades table.",
     template: "SELECT * FROM ___;",
     tool: ["SELECT says what to show. * means every column.", "FROM says which table to look in."],
@@ -111,7 +111,7 @@ const STORY = [
     success: ["74 rows. Every buy and sell the fund made this week.", "Each row is one trade: when, who, what, how much, and which account."],
   },
   {
-    type: "query", id: "s2", label: "Scene 2 · 12:10 AM", time: "12:10 AM", title: "Only what matters",
+    type: "query", id: "s2", label: "Scene 2 · {time}", time: "12:10 AM", title: "Only what matters",
     question: "Too much noise. Show only two columns: trader and amount.",
     template: "SELECT ___, ___ FROM trades;",
     tool: ["List the columns you want after SELECT.", "Put a comma between them."],
@@ -136,7 +136,7 @@ const STORY = [
   },
   { type: "sticky", term: "Error account", def: "A holding spot for trades that went wrong, until someone fixes them. It should be almost empty." },
   {
-    type: "query", id: "s3", label: "Scene 3 · 12:30 AM", time: "12:30 AM", title: "The error account",
+    type: "query", id: "s3", label: "Scene 3 · {time}", time: "12:30 AM", title: "The error account",
     question: "Show every column, but only for trades in the error account.",
     keywords: "SELECT * FROM trades WHERE …",
     tool: ["WHERE keeps only the rows that match.", "Text values go in single quotes: WHERE stock = 'NOVA'"],
@@ -169,7 +169,7 @@ const STORY = [
     lines: ["Your phone stays dark.", "Whoever 'Unknown' is, they've stopped texting."],
   },
   {
-    type: "query", id: "s4", label: "Scene 4 · 1:15 AM", time: "1:15 AM", title: "Just under the line",
+    type: "query", id: "s4", label: "Scene 4 · {time}", time: "1:15 AM", title: "Just under the line",
     voice: (f) => (f.lockedMarcus ? OKAFOR : UNKNOWN),
     question: "Narrow it down: error-account trades where the amount is over 9000.",
     keywords: "SELECT * FROM trades WHERE … AND …",
@@ -197,7 +197,7 @@ const STORY = [
   // ---------- ACT 2: searching ----------
   {
     type: "scene", image: "floor.jpg", shot: "Rows of desks, lights off", time: "1:30 AM", dark: true,
-    lines: ["1:30 AM. You switch on your phone's flashlight and cross the floor."],
+    lines: ["{time}. You switch on your phone's flashlight and cross the floor."],
   },
   {
     type: "search", image: "marcus-desk.jpg", shot: "Tidy desk with a receipt, a nameplate and a monitor", dark: true,
@@ -218,14 +218,14 @@ const STORY = [
     lines: ["If Marcus was across town at 2:14 on Sunday morning, what was the database doing at 2:14?"],
   },
   {
-    type: "predict", id: "p1", label: "Predict · 1:45 AM", title: "Predict before you run",
+    type: "predict", id: "p1", label: "Predict · {time}", title: "Predict before you run",
     query: "SELECT * FROM trades\nWHERE account = 'error' AND amount > 9000\nORDER BY amount DESC;",
     question: "Before you run anything: how many rows will this return?",
     options: ["5", "30", "74"], answer: 1,
     explain: "ORDER BY changes the order of the rows, never how many there are. Same 30 rows, biggest first.",
   },
   {
-    type: "query", id: "s5", label: "Scene 5 · 1:50 AM", time: "1:50 AM", title: "The biggest five",
+    type: "query", id: "s5", label: "Scene 5 · {time}", time: "1:50 AM", title: "The biggest five",
     question: "Show the trader, amount and time of the 5 biggest error-account trades, biggest first.",
     tool: ["ORDER BY amount sorts the rows. Add DESC for biggest first.", "LIMIT 5 keeps only the first 5 rows.", "Order: SELECT … FROM … WHERE … ORDER BY … LIMIT"],
     answer: "SELECT trader, amount, time FROM trades WHERE account = 'error' ORDER BY amount DESC LIMIT 5",
@@ -274,10 +274,10 @@ const STORY = [
   },
   {
     type: "scene", image: "desk.jpg", shot: "Seated at a desk", time: "3:10 AM",
-    lines: ["3:10 AM. Back at your desk.", "Time to see the whole week at once."],
+    lines: ["{time}. Back at your desk.", "Time to see the whole week at once."],
   },
   {
-    type: "query", id: "s7", label: "Scene 7 · 3:10 AM", title: "Totals",
+    type: "query", id: "s7", label: "Scene 7 · {time}", title: "Totals",
     question: "How much did each trader move in total this week? One row per trader.",
     tool: ["SUM(amount) adds up a column.", "GROUP BY trader gives one row per trader.", "Example: SELECT stock, SUM(amount) FROM trades GROUP BY stock;"],
     answer: "SELECT trader, SUM(amount) FROM trades GROUP BY trader",
@@ -334,9 +334,9 @@ const STORY = [
   // ---------- ACT 3: 4:12 AM ----------
   {
     type: "scene", image: "hallway.jpg", shot: "Long corridor, one light on at the far end", time: "4:12 AM", dark: true, flicker: true,
-    lines: ["4:12 AM. The floor is silent.", "Then, behind you, a beep."],
+    lines: ["{time}. The floor is silent.", "Then, behind you, a beep."],
   },
-  { type: "notify", id: "badge", title: "Badge reader · Floor 3 east", text: "Dana R. clocked in at 4:12 AM", sound: "beep", shock: true },
+  { type: "notify", id: "badge", title: "Badge reader · Floor 3 east", text: "Dana R. just clocked in", sound: "beep", shock: true },
   {
     type: "scene", image: "elevator-lit.jpg", shot: "Same lobby as lobby.jpg, lights on", sound: "ding", shock: true,
     lines: ["The elevator lights are on.", "Footsteps. Coming your way."],
@@ -365,7 +365,7 @@ const STORY = [
     ],
   },
   {
-    type: "query", id: "s8", label: "Scene 8 · 4:20 AM", time: "4:20 AM", title: "The badge log", unlock: "badges",
+    type: "query", id: "s8", label: "Scene 8 · {time}", time: "4:20 AM", title: "The badge log", unlock: "badges",
     voice: OKAFOR,
     question: "Show every badge swipe for Dana.",
     tool: ["New table: badge_swipes.", "One row each time a badge opens a door: name, door, time.", "Tip: look at the whole table first to see how names are written."],
@@ -387,7 +387,7 @@ const STORY = [
   },
   {
     type: "scene", image: "office-door.jpg", shot: "Glass office door, ajar", time: "5:00 AM", dark: true, sound: "footsteps",
-    lines: ["5:00 AM. Dana steps out with her phone to her ear and disappears into the stairwell.", "She left her office door open."],
+    lines: ["{time}. Dana steps out with her phone to her ear and disappears into the stairwell.", "She left her office door open."],
   },
   {
     type: "search", image: "office-inside.jpg", shot: "Inside a private office: desk, monitor, drawer, framed photo", dark: true,
@@ -408,7 +408,7 @@ const STORY = [
     def: "Secretly buying for yourself right before your company makes a big buy, because you know the price is about to jump. It's illegal.",
   },
   {
-    type: "query", id: "s9", label: "Scene 9 · 5:10 AM", time: "5:10 AM", title: "DR Holdings",
+    type: "query", id: "s9", label: "Scene 9 · {time}", time: "5:10 AM", title: "DR Holdings",
     question: "Show every trade in the DR Holdings account, oldest first.",
     tool: ["ORDER BY on its own sorts smallest or earliest first.", "Account names are text, so they need quotes."],
     answer: "SELECT * FROM trades WHERE account = 'DR Holdings' ORDER BY time",
@@ -432,7 +432,7 @@ const STORY = [
   // ---------- FINALE ----------
   {
     type: "scene", image: "window-dawn.jpg", shot: "Window at sunrise", time: "8:30 AM",
-    lines: ["8:30 AM. The sky over the city goes grey, then gold.", "One hour until the bell."],
+    lines: ["{time}. The sky over the city goes grey, then gold.", "{left} minutes until the bell."],
   },
   {
     type: "texts",
@@ -442,7 +442,7 @@ const STORY = [
     ],
   },
   {
-    type: "query", id: "s10a", label: "Finale · 8:35 AM", time: "8:35 AM", title: "Whose name is on them",
+    type: "query", id: "s10a", label: "Finale · {time}", time: "8:35 AM", title: "Whose name is on them",
     question: "Total the error-account trades for each trader.",
     tool: ["Put it all together: WHERE filters first, then GROUP BY adds up."],
     answer: "SELECT trader, SUM(amount) FROM trades WHERE account = 'error' GROUP BY trader",
@@ -462,7 +462,7 @@ const STORY = [
     ],
   },
   {
-    type: "query", id: "s10b", label: "Finale · 8:42 AM", time: "8:42 AM", title: "Who typed them in",
+    type: "query", id: "s10b", label: "Finale · {time}", time: "8:42 AM", title: "Who typed them in",
     question: "Total the same error-account trades by the person who actually typed each one into the system.",
     tool: ["Look at the columns of the trades table again."],
     answer: "SELECT entered_by, SUM(amount) FROM trades WHERE account = 'error' GROUP BY entered_by",
@@ -497,7 +497,7 @@ const STORY = [
   {
     type: "choice", id: "final", speaker: OKAFOR, sound: "footsteps",
     seconds: (s) => Math.max(12, 20 - Math.floor(s.lost / 10) * 2),
-    prompt: (s) => `Bell's in ${Math.max(5, 48 - s.lost)} minutes. Who do I arrest? (Behind you, Dana's door opens.)`,
+    prompt: (s) => `Bell's in ${Math.max(1, 48 - s.lost)} minutes. Who do I arrest? (Behind you, Dana's door opens.)`,
     options: [
       { label: "Dana Reyes. Sending the query as proof.", set: { ending: "caught" } },
       { label: "Dana Reyes. I'll explain on the phone.", set: { ending: "halfright" } },
@@ -511,7 +511,7 @@ const STORY = [
       caught: {
         title: "Caught", tag: "You proved it with one word: entered_by.", image: "window-dawn.jpg",
         lines: (f) => [
-          "9:12 AM. Two agents walk past your desk without looking at you.",
+          "{soon}. Two agents walk past your desk without looking at you.",
           "Dana's door opens. She looks at you once. She knows.",
           "The fund halts trading at the bell. The losses come out today, not after investors pay for them.",
           f.lockedMarcus
@@ -530,7 +530,7 @@ const STORY = [
       framed: {
         title: "Framed", tag: "The name on a record isn't always who made it.", image: "floor-morning.jpg",
         lines: () => [
-          "9:05 AM. Agents walk Marcus out past the trading floor. He doesn't fight it.",
+          "{soon}. Agents walk Marcus out past the trading floor. He doesn't fight it.",
           "Dana watches from her glass office, coffee in hand.",
           "9:31 AM. A text from the unknown number: 'you had it. it was in the data.'",
         ],
