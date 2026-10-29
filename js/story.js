@@ -107,7 +107,7 @@ const STORY = [
     messages: [
       { from: THEO, text: "wait r u at the office rn?? it says ur logged in lol" },
       { from: THEO, text: "random q. do u know what the error account is" },
-      { from: THEO, text: "i asked dana on friday and she got weird about it" },
+      { from: THEO, text: "i asked around on friday and everyone got weird about it" },
       { from: UNKNOWN, text: "it's where mistakes get parked until someone fixes them." },
       { from: UNKNOWN, text: "it should be almost empty. check it." },
     ],
@@ -229,8 +229,8 @@ const STORY = [
     spots: [
       { x: 15, y: 40, w: 13, h: 21, label: "Drink cans", text: "Three empty cans. He was here late on Friday." },
       {
-        x: 72, y: 59, w: 11, h: 9, label: "Sticky note", text: "In Theo's handwriting: 'ask Dana why error acct is so full??'",
-        clue: "Theo's sticky note: 'ask Dana why error acct is so full??'",
+        x: 72, y: 59, w: 11, h: 9, label: "Sticky note", text: "In Theo's handwriting: 'error acct way too full. who signs these off??'",
+        clue: "Theo's sticky note: 'error acct way too full. who signs these off??'",
       },
       { x: 37, y: 31, w: 30, h: 38, label: "Laptop", key: true, text: "Still logged in. A query is open in the editor. It never ran." },
     ],
@@ -283,26 +283,26 @@ const STORY = [
   {
     type: "texts",
     messages: [
-      { from: DANA, text: "rookie. why are you on the trade system at 3am?" },
-      { from: DANA, text: "I've been home all weekend and I can still see who's logged in." },
-      { from: DANA, text: "don't escalate anything until I'm in. I'll handle Marcus myself." },
+      { from: DANA, text: "rookie. you're on the trade system at 3am?" },
+      { from: DANA, text: "good. someone should be. I've had a bad feeling about Marcus for weeks." },
+      { from: DANA, text: "I've been home all weekend, but I've got your back. send me whatever you find." },
     ],
   },
   {
     type: "choice", id: "dana", speaker: DANA, seconds: 10,
-    prompt: "She's waiting for an answer.",
+    prompt: "Your boss is offering to help.",
     options: [
       {
-        label: "\"Sorry! Just running the weekly checks.\"", remember: "Dana believes you. For now.",
-        reply: [{ me: true, text: "Sorry! Just running the weekly checks." }, { from: DANA, text: "at 3am. go home." }],
+        label: "\"Thanks. I'll send you what I find.\"", set: { trustedDana: true }, remember: "Dana is in the loop now.",
+        reply: [{ me: true, text: "Thanks. I'll send you what I find." }, { from: DANA, text: "good. send it to me first. not compliance." }],
       },
       {
-        label: "\"Okay. I'll wait for you.\"", set: { promisedDana: true }, remember: "Dana will remember that.",
-        reply: [{ me: true, text: "Okay. I'll wait for you." }, { from: DANA, text: "good." }],
+        label: "\"I'll keep it between me and compliance.\"", set: { warnedDana: true }, remember: "Dana will remember that.",
+        reply: [{ me: true, text: "I'll keep it between me and compliance." }, { from: DANA, text: "...ok. careful who you trust in there." }],
       },
       {
-        label: "\"Too late. It's already with compliance.\"", set: { warnedDana: true }, remember: "Dana will remember that.",
-        reply: [{ me: true, text: "Too late. It's already with compliance." }, { from: DANA, text: "Then I'm coming in." }],
+        label: "\"Just running the weekly checks.\"", remember: "Dana believes you. For now.",
+        reply: [{ me: true, text: "Just running the weekly checks." }, { from: DANA, text: "at 3am? go home, rookie." }],
       },
     ],
     timeout: -1, timeoutText: "You leave it on read.", timeoutReply: [{ from: DANA, text: "hello?" }],
