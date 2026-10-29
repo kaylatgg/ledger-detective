@@ -10,7 +10,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
   <script>
     // Cache-busting: fresh files on every reload while developing locally, a fixed version when published.
-    window.ASSET_V = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === "file:" ? String(Date.now()) : "1";
+    // RELEASE: bump this every time you publish an update, so players get the new files instead of old cached ones.
+    const RELEASE = "2026-10-28-1";
+    window.ASSET_V = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === "file:" ? String(Date.now()) : RELEASE;
     (() => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
