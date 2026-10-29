@@ -139,7 +139,12 @@ const UI = {
       fly.style.transform = `translate(${dx}px, ${dy}px) scale(0.08) rotate(-12deg)`;
       fly.style.opacity = "0";
     }));
-    setTimeout(() => fly.remove(), 700);
+    // terminal.js waits for the card to land before the next scene starts
+    this._flying = new Promise((done) => {
+      const land = () => { fly.remove(); done(); };
+      fly.addEventListener("transitionend", (e) => { if (e.propertyName === "opacity") land(); });
+      setTimeout(land, 1000); // in case the transition never runs
+    });
   },
 
   // ---------- chapter cards ----------

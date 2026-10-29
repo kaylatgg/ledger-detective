@@ -381,6 +381,8 @@ body.term-open #phone { z-index: 32; }
   opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none;
 }
 #toast.on { opacity: 1; transform: translate(-50%, 0); }
+/* While the terminal is open, toasts sit at the bottom so they don't cover its title bar */
+body.term-open #toast { top: auto; bottom: 28px; }
 
 /* ---------- timed choice: lines, not cards ---------- */
 #choice {

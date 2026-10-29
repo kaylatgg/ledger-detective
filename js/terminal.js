@@ -283,7 +283,11 @@ const Terminal = {
       UI.flyToEvidence(card);
     };
     box.hidden = false;
-    $("#term-continue").onclick = onContinue;
+    // If the pinned card is still flying to the Evidence counter, let it land before the next scene starts.
+    $("#term-continue").onclick = () => {
+      $("#term-continue").onclick = null;
+      Promise.resolve(UI._flying).then(onContinue);
+    };
     box.scrollIntoView({ block: "nearest", behavior: "smooth" });
     setTimeout(() => (canPin ? note : $("#term-continue")).focus(), 50);
     note.onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); pinBtn.click(); $("#term-continue").focus(); } };
