@@ -132,6 +132,7 @@ const Game = {
 
   async beat_scene(b) {
     UI.setScene(b);
+    if (b.shock) UI.shock();
     if (b.sound) Sound[b.sound]();
     for (const line of b.lines || []) {
       UI.subtitle(line);
@@ -151,6 +152,7 @@ const Game = {
   },
 
   async beat_notify(b) {
+    if (b.shock) UI.shock();
     if (b.sound) Sound[b.sound]();
     UI.notify(b.title, b.text);
     await sleep(500);
@@ -196,8 +198,11 @@ const Game = {
     const seconds = typeof b.seconds === "function" ? b.seconds(this.s) : b.seconds;
     const prompt = typeof b.prompt === "function" ? b.prompt(this.s) : b.prompt;
     if (b.sound) Sound[b.sound]();
-    Sound.heartbeatOn();
-    const i = await UI.choice({ speaker: b.speaker, prompt, options: b.options, seconds });
+    // The hiding scene closes in: heartbeat speeds up, footsteps get closer. Other choices keep a steady heartbeat.
+    const stopTension = b.closeIn ? Sound.tension(seconds) : null;
+    if (!b.closeIn) Sound.heartbeatOn();
+    const i = await UI.choice({ speaker: b.speaker, prompt, options: b.options, seconds, closeIn: !!b.closeIn });
+    if (stopTension) stopTension();
     Sound.heartbeatOff();
 
     let opt;
@@ -237,6 +242,7 @@ const Game = {
   },
 
   async beat_ending(b) {
+    Sound.tickOff(); // the clock stops ticking once the case is decided
     const key = this.s.flags.ending || "toolate";
     const e = b.endings[key];
     if (!this.s.endingsSeen.includes(key)) this.s.endingsSeen.push(key);
@@ -256,6 +262,7 @@ const Game = {
   },
 
   async beat_summary() {
+    Sound.tickOff();
     this.save();
     Summary.show(this);
     await new Promise(() => {}); // the summary is the end of the game
@@ -317,6 +324,44 @@ const Summary = {
     const fmt = (c) => (!c ? "not attempted" : c.skipped ? "skipped (didn't know yet)" : c.solved ? `solved in ${c.attempts} ${c.attempts === 1 ? "try" : "tries"}` : `not solved (${c.attempts} tries)`);
     $("#summary-before").textContent = fmt(s.before);
     $("#summary-after").textContent = fmt(s.after);
+
+    // What you learned: the same question before and after, with the SQL you wrote each time.
+    const check = STORY.find((x) => x.challenge === "after");
+    $("#summary-question").textContent = check ? check.question : "";
+    for (const k of ["before", "after"]) {
+      const code = $(`#summary-${k}-sql`);
+      const sql = (s[k] && s[k].sql) || "";
+      code.textContent = sql;
+      code.hidden = !sql;
+    }
+    // Every skill you used, as a cheat sheet.
+    const skills = $("#summary-skills");
+    skills.innerHTML = "";
+    for (const [k, v] of s.learned) {
+      const li = el("li");
+      li.append(el("code", "", k), el("span", "", v));
+      skills.append(li);
+    }
+    if (!s.learned.length) skills.append(el("li", "nb-empty", "No skills recorded yet."));
+    $("#summary-skill-count").textContent = s.learned.length ? `(${s.learned.length})` : "";
+    // Every different mistake you made in a scene you then solved, with the explanation you got.
+    const fixes = [];
+    for (const b of STORY) {
+      if (b.type !== "query" || b.challenge) continue;
+      const st = s.stats[b.id];
+      if (!st || !st.solved) continue;
+      for (const m of new Set(st.mistakes)) fixes.push([b.title, m]);
+    }
+    const list = $("#summary-fixes");
+    list.innerHTML = "";
+    for (const [title, m] of fixes.slice(0, 8)) {
+      const li = el("li");
+      li.append(el("span", "sum-fix-scene", title), el("span", "sum-fix-text", m));
+      list.append(li);
+    }
+    if (!fixes.length) list.append(el("li", "nb-empty", "None. Every query worked the first time."));
+    if (fixes.length > 8) list.append(el("li", "nb-empty", `…and ${fixes.length - 8} more in the scene-by-scene notes.`));
+    $("#summary-fix-count").textContent = fixes.length ? `(${fixes.length})` : "";
     const names = { caught: "Caught", halfright: "Half Right", framed: "Framed", toolate: "Too Late" };
     $("#summary-endings").textContent = s.endingsSeen.map((k) => names[k]).join(", ") || "none";
     const mins = Math.round((Date.now() - s.started) / 60000);
@@ -335,7 +380,8 @@ const Summary = {
 
   text(s) {
     const lines = ["LEDGER DETECTIVE: NIGHT SHIFT — results", ""];
-    lines.push("Before: " + $("#summary-before").textContent, "After: " + $("#summary-after").textContent, "");
+    lines.push("Before: " + $("#summary-before").textContent, "After: " + $("#summary-after").textContent);
+    lines.push("Skills used: " + (s.learned.map((l) => l[0]).join(" · ") || "none"), "");
     for (const b of STORY) {
       if ((b.type !== "query" && b.type !== "predict") || b.challenge) continue;
       const st = s.stats[b.id];

@@ -25,6 +25,7 @@
   <!-- The cinematic frame: the image, darkness, flashlight and subtitles -->
   <div id="frame">
     <div id="stage">
+      <div id="bg-old" aria-hidden="true"></div>
       <div id="bg"></div>
       <div id="placeholder" hidden>
         <span id="ph-label"></span>
@@ -279,19 +280,38 @@
   <!-- Summary -->
   <section id="summary" class="overlay" hidden>
     <div class="paper wide">
-      <div class="paper-kicker">Case closed</div>
-      <h2>Your night, in numbers</h2>
+      <div class="stamp" aria-hidden="true">Case closed</div>
+      <div class="paper-kicker">Ledger Detective · Your night</div>
+      <h2>What you learned tonight</h2>
+      <p class="sum-question">The skills check: <span id="summary-question"></span></p>
+      <div class="sum-compare">
+        <div class="sum-side">
+          <span class="sum-label">Before the night</span>
+          <b id="summary-before"></b>
+          <code id="summary-before-sql" hidden></code>
+        </div>
+        <div class="sum-side">
+          <span class="sum-label">After the night</span>
+          <b id="summary-after"></b>
+          <code id="summary-after-sql" hidden></code>
+        </div>
+      </div>
+      <h3 class="sum-head">Skills you used <span id="summary-skill-count"></span></h3>
+      <ul id="summary-skills" class="sum-skills"></ul>
+      <h3 class="sum-head">Mistakes you fixed <span id="summary-fix-count"></span></h3>
+      <ol id="summary-fixes" class="sum-fixes"></ol>
       <div class="sum-grid">
-        <div><span>Before</span><b id="summary-before"></b></div>
-        <div><span>After</span><b id="summary-after"></b></div>
         <div><span>Hints used</span><b id="summary-hints"></b></div>
         <div><span>Endings seen</span><b id="summary-endings"></b></div>
         <div><span>Time played</span><b id="summary-time"></b></div>
       </div>
-      <table class="sum-table">
-        <thead><tr><th>Scene</th><th>Tries</th><th>Hints</th><th>Result</th></tr></thead>
-        <tbody id="summary-rows"></tbody>
-      </table>
+      <details class="sum-details">
+        <summary>Scene by scene</summary>
+        <table class="sum-table">
+          <thead><tr><th>Scene</th><th>Tries</th><th>Hints</th><th>Result</th></tr></thead>
+          <tbody id="summary-rows"></tbody>
+        </table>
+      </details>
       <textarea id="summary-text" hidden aria-label="Results text"></textarea>
       <div class="ending-actions">
         <button id="summary-copy" type="button">Copy results</button>

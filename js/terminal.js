@@ -105,7 +105,7 @@ const Terminal = {
         $("#term-status").className = "good";
         if (r.note) say(r.note);
         Sound.success();
-        if (b.challenge) s[b.challenge] = { solved: true, attempts: st.attempts };
+        if (b.challenge) s[b.challenge] = { solved: true, attempts: st.attempts, sql: input.value.trim() };
         for (const l of b.learn || []) {
           if (!s.learned.some((x) => x[0] === l[0])) s.learned.push(l);
         }
@@ -132,7 +132,7 @@ const Terminal = {
         input.focus();
       };
       skipBtn.onclick = () => {
-        if (b.challenge) s[b.challenge] = { solved: false, attempts: st.attempts, skipped: true };
+        if (b.challenge) s[b.challenge] = { solved: false, attempts: st.attempts, skipped: true, sql: input.value.trim() };
         st.skipped = true;
         finish("skipped");
       };

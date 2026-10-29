@@ -314,13 +314,13 @@ const STORY = [
     type: "scene", image: "hallway.jpg", shot: "Long corridor, one light on at the far end", time: "4:12 AM", dark: true, flicker: true,
     lines: ["4:12 AM. The floor is silent.", "Then, behind you, a beep."],
   },
-  { type: "notify", title: "Badge reader · Floor 3 east", text: "Dana R. clocked in at 4:12 AM", sound: "beep" },
+  { type: "notify", title: "Badge reader · Floor 3 east", text: "Dana R. clocked in at 4:12 AM", sound: "beep", shock: true },
   {
-    type: "scene", image: "elevator-lit.jpg", shot: "Same lobby as lobby.jpg, lights on", sound: "ding",
+    type: "scene", image: "elevator-lit.jpg", shot: "Same lobby as lobby.jpg, lights on", sound: "ding", shock: true,
     lines: ["The elevator lights are on.", "Footsteps. Coming your way."],
   },
   {
-    type: "choice", id: "hide", speaker: "Footsteps", seconds: 8, sound: "footsteps",
+    type: "choice", id: "hide", speaker: "Footsteps", seconds: 8, sound: "footsteps", closeIn: true,
     prompt: "She's almost at the corner. Your terminal is wide open.",
     options: [
       { label: "Close the terminal", lines: ["You close it just in time. Her footsteps slow by your desk, then move on."] },

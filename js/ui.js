@@ -23,6 +23,8 @@ const UI = {
     frame.classList.toggle("dark", !!b.dark);
     frame.classList.toggle("flicker", !!b.flicker);
     frame.classList.toggle("still", !!b.still);
+    // Cinematic camera: tense scenes slowly push in; calm ones drift.
+    frame.classList.toggle("push", !!(b.dark || b.flicker || b.shock) && !b.still);
     if (!b.image) return;
     const token = ++this.sceneToken;
     const src = "images/" + b.image;
@@ -30,8 +32,21 @@ const UI = {
     const ph = $("#placeholder");
     const show = (ok) => {
       if (token !== this.sceneToken) return;
+      const prev = bg.style.backgroundImage;
+      if (ok && prev === `url("${src}")`) { ph.hidden = true; return; } // same picture: no transition
+      // Smooth transition: the old picture fades out on top of the new one as it fades in.
+      const old = $("#bg-old");
+      if (prev) {
+        old.style.backgroundImage = prev;
+        old.style.transform = getComputedStyle(bg).transform;
+        old.classList.remove("out");
+        void old.offsetWidth;
+        old.classList.add("out");
+      }
+      bg.style.transition = "none";
       bg.classList.remove("in");
-      void bg.offsetWidth; // restart the slow camera drift
+      void bg.offsetWidth; // start the new picture from invisible and restart the camera move
+      bg.style.transition = "";
       if (ok) {
         bg.style.backgroundImage = `url("${src}")`;
         ph.hidden = true;
@@ -58,9 +73,36 @@ const UI = {
 
   // ---------- HUD ----------
   clock(text, lostMin) {
-    $("#clock").textContent = to24(text);
+    const clock = $("#clock");
+    const hhmm = to24(text);
+    clock.textContent = hhmm;
     $("#phone-time").textContent = text.replace(/\s*[AP]M$/, ""); // the status bar drops AM/PM, like iOS
     $("#lost").textContent = lostMin ? `−${lostMin} min` : "";
+    // Clock pressure: losing minutes jolts the clock (not when a saved game loads).
+    if (this._lost !== undefined && lostMin > this._lost) {
+      clock.classList.remove("jolt");
+      void clock.offsetWidth; // restart the animation
+      clock.classList.add("jolt");
+    }
+    this._lost = lostMin;
+    // The last hour before the 9:30 bell: the clock turns orange and ticks every second.
+    const m = hhmm.match(/^(\d\d):(\d\d)$/);
+    const late = !!m && ((m[1] === "08" && Number(m[2]) >= 30) || m[1] === "09");
+    clock.classList.toggle("late", late);
+    if (late) Sound.tickOn();
+    else Sound.tickOff();
+  },
+  // Shock cut: a white flash, the frame jolts, a low hit, and the clock flashes red.
+  shock() {
+    const frame = $("#frame");
+    frame.classList.remove("shock");
+    document.body.classList.remove("shocked");
+    void frame.offsetWidth; // restart the animations
+    frame.classList.add("shock");
+    document.body.classList.add("shocked");
+    clearTimeout(this._shock);
+    this._shock = setTimeout(() => { frame.classList.remove("shock"); document.body.classList.remove("shocked"); }, 1400);
+    Sound.hit();
   },
   evidence(n) {
     const count = $("#evidence-count");
@@ -98,7 +140,17 @@ const UI = {
   // ---------- chapter cards ----------
   async chapter(title, sub, big) {
     const c = $("#chapter");
-    $("#chapter-title").textContent = title;
+    // The title types in, letter by letter.
+    const t = $("#chapter-title");
+    t.textContent = "";
+    t.setAttribute("aria-label", title);
+    [...title].forEach((ch, i) => {
+      const span = el("span", "ch", ch);
+      span.setAttribute("aria-hidden", "true");
+      span.style.animationDelay = `${300 + i * 45}ms`;
+      t.append(span);
+    });
+    Sound.typing(title.replace(/\s/g, "").length, 0.045, 0.3);
     $("#chapter-sub").textContent = sub || "";
     c.classList.toggle("big", !!big);
     c.hidden = false;
@@ -135,9 +187,12 @@ const UI = {
   stickyOff() { $("#sticky").classList.remove("on"); },
 
   // ---------- timed choice ----------
-  choice({ speaker, prompt, options, seconds }) {
+  choice({ speaker, prompt, options, seconds, closeIn }) {
     return new Promise((resolve) => {
       const box = $("#choice");
+      // The hiding scene: the screen closes in as the timer runs out.
+      box.classList.toggle("closing", !!closeIn);
+      box.style.setProperty("--secs", seconds + "s");
       $("#choice-speaker").textContent = speaker || "";
       $("#choice-prompt").textContent = prompt;
       const list = $("#choice-options");

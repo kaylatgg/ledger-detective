@@ -6,6 +6,7 @@ const Sound = {
   master: null,
   muted: false,
   heart: null,
+  ticker: null,
 
   start() {
     if (this.ctx) return;
@@ -87,4 +88,39 @@ const Sound = {
     this.heart = setInterval(beat, 850);
   },
   heartbeatOff() { clearInterval(this.heart); this.heart = null; },
+
+  // Shock cut: a low hit under the scare.
+  hit() { this.tone(48, 0.7, { type: "sawtooth", vol: 0.18, attack: 0.005 }); this.tone(96, 0.25, { type: "square", vol: 0.05 }); },
+  // Chapter titles: one soft key click per letter.
+  typing(n, gap = 0.045, delay = 0) {
+    for (let i = 0; i < n; i++) this.tone(2200 + Math.random() * 600, 0.02, { type: "square", vol: 0.012, delay: delay + i * gap });
+  },
+  // The last hour before the bell: a quiet tick every second.
+  tickOn() {
+    if (this.ticker || !this.ctx) return;
+    this.ticker = setInterval(() => this.tone(1400, 0.03, { type: "square", vol: 0.015 }), 1000);
+  },
+  tickOff() { clearInterval(this.ticker); this.ticker = null; },
+  // The hiding scene: the heartbeat speeds up and footsteps get louder as time runs out. Returns a stop function.
+  tension(seconds) {
+    if (!this.ctx) return () => {};
+    const start = Date.now();
+    const timers = [];
+    let stopped = false;
+    const progress = () => Math.min(1, (Date.now() - start) / (seconds * 1000));
+    const beat = () => {
+      if (stopped) return;
+      this.tone(60, 0.15, { vol: 0.3 });
+      this.tone(55, 0.15, { vol: 0.25, delay: 0.18 });
+      timers.push(setTimeout(beat, 900 - 520 * progress()));
+    };
+    const step = () => {
+      if (stopped) return;
+      this.tone(70, 0.18, { type: "triangle", vol: 0.08 + 0.4 * progress() });
+      timers.push(setTimeout(step, 600));
+    };
+    beat();
+    timers.push(setTimeout(step, 300));
+    return () => { stopped = true; timers.forEach(clearTimeout); };
+  },
 };

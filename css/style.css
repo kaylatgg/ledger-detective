@@ -77,17 +77,32 @@ kbd { font-family: var(--mono); font-size: 11px; padding: 0 4px; border-radius: 
 #stage { position: absolute; left: 50%; top: 50%; width: max(100vw, 177.78vh); height: max(100vh, 56.25vw); transform: translate(-50%, -50%); }
 /* Tall screens (phones held upright): fit instead of cover, so hotspots at the sides aren't cropped off. */
 @media (max-aspect-ratio: 4/3) { #stage { width: min(100vw, 177.78vh); height: min(100vh, 56.25vw); } }
-#bg {
+#bg, #bg-old {
   position: absolute; inset: -3%;
   background: center / cover no-repeat;
-  opacity: 0; transition: opacity 0.9s ease;
+  opacity: 0;
 }
+#bg { transition: opacity 0.7s ease; }
+/* Smooth transition: the previous picture fades out on top while the new one fades in. */
+#bg-old { pointer-events: none; }
+#bg-old.out { animation: bg-out 0.7s ease forwards; }
+@keyframes bg-out { from { opacity: 1; } to { opacity: 0; } }
 /* The grade: a cold green night over every image. Colour blend keeps the brightness. */
-#bg::after { content: ""; position: absolute; inset: 0; background: var(--grade); mix-blend-mode: color; pointer-events: none; }
+#bg::after, #bg-old::after { content: ""; position: absolute; inset: 0; background: var(--grade); mix-blend-mode: color; pointer-events: none; }
 #bg.in { opacity: 1; animation: drift 38s ease-in-out infinite alternate; }
 #frame.dark #bg { filter: brightness(0.95) saturate(0.95); }
 #frame.flicker #bg { animation: drift 38s ease-in-out infinite alternate, flicker 5s steps(1) infinite; }
 #frame.still #bg { inset: 0; animation: none; }
+/* Cinematic camera: tense scenes slowly push in instead of drifting. */
+#frame.push #bg.in { animation: push 24s cubic-bezier(0.2, 0.6, 0.3, 1) forwards; }
+#frame.push.flicker #bg.in { animation: push 24s cubic-bezier(0.2, 0.6, 0.3, 1) forwards, flicker 5s steps(1) infinite; }
+@keyframes push { from { transform: scale(1); } to { transform: scale(1.1); } }
+/* Shock cut: one white flash and a short jolt. */
+#frame::after { content: ""; position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+#frame.shock { animation: shake 0.3s linear; }
+#frame.shock::after { animation: flash 0.35s ease-out; }
+@keyframes flash { 0% { opacity: 0.7; } 100% { opacity: 0; } }
+@keyframes shake { 0%, 100% { transform: none; } 20% { transform: translate(-8px, 4px); } 40% { transform: translate(7px, -5px); } 60% { transform: translate(-5px, 3px); } 80% { transform: translate(3px, -2px); } }
 @keyframes drift { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.04) translate(-1%, -0.6%); } }
 @keyframes flicker { 0%, 100% { filter: brightness(0.95); } 41% { filter: brightness(0.45); } 43% { filter: brightness(1.05); } 45% { filter: brightness(0.5); } 47% { filter: brightness(0.95); } }
 
@@ -171,8 +186,18 @@ body.dev .spot-label { opacity: 1; }
 /* above the terminal's backdrop, which starts just below it; solid there so the terminal reads as a screen */
 body.term-open #hud { z-index: 31; background: var(--ink); }
 .hud-left { display: flex; align-items: baseline; gap: 22px; }
-#clock { font-size: 22px; font-weight: 500; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
-#lost { color: var(--signal); }
+#clock { display: inline-block; font-size: 22px; font-weight: 500; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; transition: color 0.6s; }
+#lost { display: inline-block; color: var(--signal); }
+/* Clock pressure: the last hour turns the clock orange; lost minutes jolt it */
+#clock.late { color: var(--signal); }
+#clock.jolt { animation: jolt 0.45s ease-out; }
+#clock.jolt + #lost { animation: lost-in 0.6s ease-out; }
+body.shocked #clock { animation: clock-alarm 0.3s steps(1) 4; }
+@keyframes jolt { 0% { transform: none; } 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 100% { transform: none; } }
+@keyframes lost-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+@keyframes clock-alarm { 0% { color: var(--alarm); } 50% { color: var(--bone); } }
+/* the badge alert slams in during a shock instead of sliding */
+body.shocked #notify { transition: none; }
 .hud-bell { color: var(--ash); }
 .hud-right { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
 .hud-evidence { color: var(--ash); padding: 0 14px; white-space: nowrap; }
@@ -358,7 +383,17 @@ body.term-open #phone { z-index: 32; }
   position: fixed; left: var(--gutter); bottom: 0; height: var(--bar); display: flex; align-items: center;
   font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ash);
 }
-.choice-inner { width: min(1200px, calc(100vw - 2 * var(--gutter))); padding-bottom: calc(var(--bar) + 5vh); }
+.choice-inner { position: relative; z-index: 1; width: min(1200px, calc(100vw - 2 * var(--gutter))); padding-bottom: calc(var(--bar) + 5vh); }
+/* The hiding scene: darkness closes in from the edges over the length of the timer */
+#choice.closing::before {
+  content: ""; position: fixed; inset: -50%; pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 22%, rgba(0, 0, 0, 0.92) 40%);
+  animation: close-in var(--secs, 8s) linear forwards;
+}
+@keyframes close-in { from { transform: scale(1.35); } to { transform: scale(0.8); } }
+/* the last three seconds: the timer line pulses red */
+#choice.closing #choice-bar { animation: bar-alarm 0.5s steps(1) infinite; animation-delay: calc(var(--secs, 8s) - 3s); }
+@keyframes bar-alarm { 0% { background: var(--alarm); } 50% { background: var(--signal); } }
 #choice-speaker {
   display: flex; align-items: center; gap: 12px;
   font-family: var(--mono); font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--signal);
@@ -389,6 +424,9 @@ body.term-open #phone { z-index: 32; }
 #chapter-sub { margin-top: 18px; font-family: var(--mono); font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ash); }
 #chapter.big #chapter-title { font-size: clamp(56px, 11vw, 168px); line-height: 0.84; }
 #chapter.big #chapter-sub { font-family: var(--voice); font-size: clamp(20px, 2vw, 30px); font-weight: 300; font-style: italic; letter-spacing: 0; text-transform: none; color: var(--bone); }
+/* chapter titles type in letter by letter */
+#chapter-title .ch { opacity: 0; animation: ch-in 0.01s linear forwards; }
+@keyframes ch-in { to { opacity: 1; } }
 
 /* ---------- terminal: the bank's system ---------- */
 #terminal {
@@ -617,6 +655,31 @@ tr.lit-where .pick { border-color: var(--literal); color: var(--literal); }
 .sum-table th:nth-child(2), .sum-table th:nth-child(3), .sum-table td:nth-child(2), .sum-table td:nth-child(3) { text-align: right; font-variant-numeric: tabular-nums; }
 .sum-table th:nth-child(4), .sum-table td:nth-child(4) { padding-left: 24px; }
 #summary-text { width: 100%; height: 160px; margin-top: 12px; font-family: var(--mono); font-size: 12px; color: var(--type); background: var(--paper); border: 1px solid var(--manila); }
+/* What you learned: before vs after, skills, mistakes you fixed */
+#summary h2 { padding-right: 190px; }  /* room for the stamp */
+.sum-question { margin: 14px 0 12px; font-size: 15px; }
+#summary-question { font-family: var(--voice); font-size: 16px; font-style: italic; }
+.sum-compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--type); border-bottom: 1px solid var(--type); }
+.sum-side { min-width: 0; display: flex; flex-direction: column; gap: 6px; padding: 14px 18px 16px 0; }
+.sum-side + .sum-side { padding-left: 18px; border-left: 1px solid var(--manila); }
+.sum-label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faded); }
+.sum-side b { font-family: var(--display); font-size: 30px; font-weight: 800; font-stretch: 75%; line-height: 1.05; text-transform: uppercase; }
+.sum-side code { font-family: var(--mono); font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--pen); }
+.sum-head { margin: 24px 0 8px; font-family: var(--document); font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faded); }
+.sum-head span { font-weight: 400; }
+.sum-skills { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 24px; }
+.sum-skills li { min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 14px; line-height: 1.35; }
+.sum-skills code { font-family: var(--mono); font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+.sum-fixes { list-style: none; margin: 0; padding: 0; counter-reset: fix; }
+.sum-fixes li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 2px 0; padding: 9px 0; border-top: 1px solid var(--manila); }
+.sum-fixes li:not(.nb-empty) { counter-increment: fix; }
+.sum-fixes li:not(.nb-empty)::before { content: counter(fix, decimal-leading-zero); grid-row: 1 / span 2; font-weight: 700; color: var(--stamp); }
+.sum-fixes li.nb-empty { display: block; }
+.sum-fix-scene { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faded); }
+.sum-fix-text { font-family: var(--voice); font-size: 15px; line-height: 1.4; }
+.sum-details { margin-top: 18px; }
+.sum-details summary { cursor: pointer; padding: 6px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faded); }
+.sum-details[open] summary { margin-bottom: 8px; }
 
 /* ---------- notebook: the case file again ---------- */
 #notebook {
@@ -699,7 +762,9 @@ tr.lit-where .pick { border-color: var(--literal); color: var(--literal); }
   .title-count { text-align: left; }
   .paper { padding: 24px; }
   .stamp { position: static; display: inline-block; margin: 4px 0 18px; }
-  #report h2 { padding-right: 0; }
+  #report h2, #summary h2 { padding-right: 0; }
+  .sum-compare, .sum-skills { grid-template-columns: minmax(0, 1fr); }
+  .sum-side + .sum-side { padding-left: 0; border-left: 0; border-top: 1px solid var(--manila); }
   #choice::after { display: none; }
   #hud { font-size: 11px; padding: 0 12px; }
   #clock { font-size: 18px; }
@@ -711,4 +776,6 @@ tr.lit-where .pick { border-color: var(--literal); color: var(--literal); }
 
 @media (prefers-reduced-motion: reduce) {
   #bg.in, .grain, .spot, #sub-more, .msg.typing i, .feed-msg.pulse, .ev-card.in, .ev-card.in .ev-card-stamp, #evidence-count.bump { animation: none !important; }
+  #frame.shock, #frame.shock::after, #clock.jolt, #choice.closing::before, #bg-old.out { animation: none !important; }
+  #chapter-title .ch { animation: none !important; opacity: 1; }
 }
