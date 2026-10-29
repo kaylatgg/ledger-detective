@@ -20,15 +20,19 @@ def add(time, trader, entered_by, action, stock, amount, account):
 WEEKDAYS = ["2026-10-26", "2026-10-27", "2026-10-28", "2026-10-29", "2026-10-30"]
 STOCKS = ["NOVA", "ATLAS", "KITE", "ORBIT", "FERN"]
 
-# 1. Normal daytime trading in the main account. Everyone enters their own trades.
+# 1. Normal daytime trading in the main account. Traders enter their own trades, but
+#    Dana, as head of trading, types in every other one for her team. That's routine
+#    desk admin, so "dana.r" in entered_by doesn't look suspicious early in the game.
+#    (Chosen by position, not by random, so every other value in the case stays the same.)
 people = [("Marcus", "marcus.l", 18000, 60000, 14),
           ("Priya", "priya.s", 12000, 48000, 12),
           ("Theo", "theo.k", 400, 3000, 8)]
 for name, handle, lo, hi, count in people:
-    for _ in range(count):
+    for i in range(count):
         day = random.choice(WEEKDAYS)
         t = f"{day} {random.randint(9, 15):02d}:{random.randint(0, 59):02d}"
-        add(t, name, handle, random.choice(["BUY", "SELL"]), random.choice(STOCKS),
+        booker = "dana.r" if i % 2 == 1 else handle
+        add(t, name, booker, random.choice(["BUY", "SELL"]), random.choice(STOCKS),
             random.randrange(lo, hi, 50), "main")
 
 # 2. Genuine mistakes parked in the error account: small, entered by their own traders.

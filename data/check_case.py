@@ -55,8 +55,10 @@ for day in ("2026-10-27", "2026-10-29", "2026-11-01"):
     first = db.execute("SELECT MIN(time) FROM trades WHERE entered_by = 'dana.r' AND account = 'error' AND time LIKE ?", (day + "%",)).fetchone()[0]
     assert swipe and first and swipe < first, (day, swipe, first)
 
-# dana.r never touches the main account, and nobody else enters trades for someone else.
-assert db.execute("SELECT COUNT(*) FROM trades WHERE entered_by = 'dana.r' AND account = 'main'").fetchone()[0] == 0
+# dana.r types in plenty of routine main-account trades for her team (so she doesn't stand out
+# early), but only during the day. Nobody else enters trades for someone else.
+assert db.execute("SELECT COUNT(*) FROM trades WHERE entered_by = 'dana.r' AND account = 'main'").fetchone()[0] >= 10
+assert db.execute("SELECT COUNT(*) FROM trades WHERE entered_by = 'dana.r' AND account = 'main' AND substr(time, 12, 2) < '09'").fetchone()[0] == 0
 assert db.execute("SELECT COUNT(*) FROM trades WHERE entered_by != 'dana.r' AND entered_by NOT LIKE lower(trader) || '.%'").fetchone()[0] == 0
 
 # Every trade has a value in every column.
