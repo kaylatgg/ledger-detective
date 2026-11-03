@@ -89,6 +89,35 @@ const Sound = {
   },
   heartbeatOff() { clearInterval(this.heart); this.heart = null; },
 
+  // Time passing: each flip of the clock's digits is a dry click; it settles with a low thud,
+  // plus a soft two-note chime when an hour has passed.
+  flip() { this.tone(900 + Math.random() * 120, 0.015, { type: "square", vol: 0.03 }); },
+  clockSet(hourPassed) {
+    this.tone(82, 0.35, { type: "triangle", vol: 0.28 });
+    if (hourPassed) {
+      this.tone(659, 1.6, { vol: 0.07, delay: 0.25 });
+      this.tone(494, 2.2, { vol: 0.07, delay: 0.75 });
+    }
+  },
+  // Losing minutes to a hint or a choice: a sour falling note, then two fast clock ticks.
+  penalty() {
+    if (!this.ctx) return;
+    const c = this.ctx;
+    const t = c.currentTime;
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(330, t);
+    o.frequency.exponentialRampToValueAtTime(110, t + 0.35);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.07, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+    o.connect(g).connect(this.master);
+    o.start(t);
+    o.stop(t + 0.5);
+    this.tone(1400, 0.03, { type: "square", vol: 0.03, delay: 0.45 });
+    this.tone(1400, 0.03, { type: "square", vol: 0.03, delay: 0.55 });
+  },
   // Shock cut: a low hit under the scare.
   hit() { this.tone(48, 0.7, { type: "sawtooth", vol: 0.18, attack: 0.005 }); this.tone(96, 0.25, { type: "square", vol: 0.05 }); },
   // Chapter titles: one soft key click per letter.

@@ -303,7 +303,8 @@ function insertAtCursor(input, text) {
   const start = input.selectionStart;
   const end = input.selectionEnd;
   const before = input.value.slice(0, start);
-  const pad = /[\w*]$/.test(before) ? " " : ""; // clicking "trades" right after "FROM" gives "FROM trades"
+  // Add a space when the click follows a word, ), a quote or a comma: "FROM" + trades gives "FROM trades", "trader," + amount gives "trader, amount"
+  const pad = /[\w*)'",]$/.test(before) ? " " : "";
   input.value = before + pad + text + input.value.slice(end);
   input.selectionStart = input.selectionEnd = start + pad.length + text.length;
   input.focus();

@@ -208,6 +208,8 @@ body.shocked #clock { animation: clock-alarm 0.3s steps(1) 4; }
 /* the badge alert slams in during a shock instead of sliding */
 body.shocked #notify { transition: none; }
 .hud-bell { color: var(--ash); }
+/* After the clock rolls forward: how long is left, in orange, for a few seconds */
+.hud-bell.countdown { color: var(--signal); animation: lost-in 0.4s ease-out; }
 .hud-right { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
 .hud-evidence { color: var(--ash); padding: 0 14px; white-space: nowrap; }
 .hud-evidence b { color: var(--bone); font-weight: 500; }

@@ -80,22 +80,65 @@ const UI = {
   clock(text, lostMin) {
     const clock = $("#clock");
     const hhmm = to24(text);
+    const mins = text ? toMinutes(text) : null;
+    const from = this._shown;
+    this._shown = mins;
+    clearInterval(this._roll);
+    clock.classList.remove("rolling");
     clock.textContent = hhmm;
     $("#phone-time").textContent = text.replace(/\s*[AP]M$/, ""); // the status bar drops AM/PM, like iOS
     $("#lost").textContent = lostMin ? `−${lostMin} min lost` : "";
-    // Clock pressure: losing minutes jolts the clock (not when a saved game loads).
-    if (this._lost !== undefined && lostMin > this._lost) {
+    // Clock pressure: losing minutes jolts the clock and plays a sour drop (not when a saved game loads).
+    const lostMore = this._lost !== undefined && lostMin > this._lost;
+    if (lostMore) {
       clock.classList.remove("jolt");
       void clock.offsetWidth; // restart the animation
       clock.classList.add("jolt");
+      Sound.penalty();
     }
     this._lost = lostMin;
+    // Time moving on between scenes: the digits roll forward (not on the first show, or when a saved game loads).
+    if (from != null && mins != null && mins > from && !lostMore) this.rollClock(from, mins);
     // The last hour before the 9:30 bell: the clock turns orange and ticks every second.
     const m = hhmm.match(/^(\d\d):(\d\d)$/);
     const late = !!m && ((m[1] === "08" && Number(m[2]) >= 30) || m[1] === "09");
     clock.classList.toggle("late", late);
     if (late) Sound.tickOn();
     else Sound.tickOff();
+  },
+  // The digits flip forward one step at a time with a click each, then settle with a thud
+  // (and a soft chime if an hour passed). Then the HUD says how long is left until the bell.
+  rollClock(from, to) {
+    const clock = $("#clock");
+    const steps = Math.min(12, to - from);
+    let i = 0;
+    clock.classList.add("rolling");
+    clock.textContent = to24(fromMinutes(from));
+    this._roll = setInterval(() => {
+      i++;
+      const now = i >= steps ? to : Math.round(from + ((to - from) * i) / steps);
+      clock.textContent = to24(fromMinutes(now));
+      if (i < steps) { Sound.flip(); return; }
+      clearInterval(this._roll);
+      clock.classList.remove("rolling");
+      Sound.clockSet(Math.floor(from / 60) !== Math.floor(to / 60));
+      this.bellCountdown(to);
+    }, 70);
+  },
+  // "6 hr 20 min to the bell", in orange, in place of "Market opens 09:30" for a few seconds.
+  bellCountdown(now) {
+    const left = BELL - now;
+    if (left <= 0) return;
+    const bell = $(".hud-bell");
+    bell.dataset.text ||= bell.textContent;
+    const h = Math.floor(left / 60);
+    const m = left % 60;
+    bell.textContent = (h ? h + " hr " : "") + (m || !h ? m + " min " : "") + "to the bell";
+    bell.classList.remove("countdown");
+    void bell.offsetWidth; // restart the animation
+    bell.classList.add("countdown");
+    clearTimeout(this._bell);
+    this._bell = setTimeout(() => { bell.textContent = bell.dataset.text; bell.classList.remove("countdown"); }, 3500);
   },
   // Shock cut: a white flash, the frame jolts, a low hit, and the clock flashes red.
   shock() {
