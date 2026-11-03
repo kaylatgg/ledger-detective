@@ -212,7 +212,11 @@ const Terminal = {
     for (const [name, cols] of Object.entries(DB.schema)) {
       if (name === "badge_swipes" && !game.s.flags.badges) continue;
       const t = el("div", "tbl");
-      t.append(el("div", "tbl-name", name));
+      const tname = el("button", "tbl-name", name);
+      tname.type = "button";
+      tname.title = "Insert " + name;
+      tname.onclick = () => insertAtCursor($("#term-input"), name);
+      t.append(tname);
       const list = el("div", "tbl-cols");
       for (const c of cols) {
         const btn = el("button", "col", c);
@@ -298,8 +302,10 @@ function insertAtCursor(input, text) {
   if (input.readOnly) return;
   const start = input.selectionStart;
   const end = input.selectionEnd;
-  input.value = input.value.slice(0, start) + text + input.value.slice(end);
-  input.selectionStart = input.selectionEnd = start + text.length;
+  const before = input.value.slice(0, start);
+  const pad = /[\w*]$/.test(before) ? " " : ""; // clicking "trades" right after "FROM" gives "FROM trades"
+  input.value = before + pad + text + input.value.slice(end);
+  input.selectionStart = input.selectionEnd = start + pad.length + text.length;
   input.focus();
   Translate.render($("#term-translate"), input.value); // setting value doesn't fire "input"
 }

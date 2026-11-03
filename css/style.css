@@ -462,7 +462,9 @@ body.term-open #toast { top: auto; bottom: 28px; }
 body.term-open .term-feed { padding-bottom: 120px; scroll-padding-bottom: 120px; }
 .term-side h3, .term-feed h3 { margin: 0 0 12px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ash); font-weight: 500; }
 .tbl { margin-bottom: 14px; }
-.tbl-name { font-family: var(--mono); font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--table); margin-bottom: 4px; }
+/* Table names are buttons like the columns, written exactly as they get typed */
+.tbl-name { display: block; min-height: 28px; margin: 0 0 2px -6px; padding: 2px 6px; border: 0; background: none; font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--table); text-align: left; }
+.tbl-name:hover { background: var(--table); color: var(--ink); }
 .tbl-cols { display: flex; flex-wrap: wrap; gap: 2px 4px; }
 .col { min-height: 28px; padding: 2px 6px; font-family: var(--mono); font-size: 13px; border: 0; background: none; color: var(--signal-soft); }
 .col:hover:not(:disabled) { background: var(--signal); color: var(--ink); }

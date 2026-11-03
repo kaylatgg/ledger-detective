@@ -11,7 +11,7 @@
   <script>
     // Cache-busting: fresh files on every reload while developing locally, a fixed version when published.
     // RELEASE: bump this every time you publish an update, so players get the new files instead of old cached ones.
-    const RELEASE = "2026-10-29-2";
+    const RELEASE = "2026-11-03-1";
     window.ASSET_V = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === "file:" ? String(Date.now()) : RELEASE;
     (() => {
       const link = document.createElement("link");
@@ -150,7 +150,7 @@
         <aside class="term-side">
           <h3>Tables</h3>
           <div id="term-tables"></div>
-          <p class="side-tip">Click a column to type it.</p>
+          <p class="side-tip">Click a table or column to type it.</p>
           <button id="btn-lesson" class="lesson-btn" type="button">How a query works</button>
           <div id="term-tool" class="tool-note"></div>
         </aside>
