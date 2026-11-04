@@ -11,7 +11,7 @@
   <script>
     // Cache-busting: fresh files on every reload while developing locally, a fixed version when published.
     // RELEASE: bump this every time you publish an update, so players get the new files instead of old cached ones.
-    const RELEASE = "2026-11-03-2";
+    const RELEASE = "2026-11-03-3";
     window.ASSET_V = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === "file:" ? String(Date.now()) : RELEASE;
     (() => {
       const link = document.createElement("link");
@@ -58,7 +58,8 @@
     <div class="hud-right">
       <span class="hud-evidence">Evidence <b id="evidence-count">0</b></span>
       <button id="btn-notebook" type="button">Notebook <kbd>N</kbd></button>
-      <button id="btn-sound" type="button" aria-pressed="true"><span id="sound-label">Sound on</span> <kbd>M</kbd></button>
+      <button id="btn-ambient" type="button" aria-pressed="true" title="Background sound and music"><span id="ambient-label">Ambient on</span></button>
+      <button id="btn-effects" type="button" aria-pressed="true" title="Sound effects. Press M to turn all sound on or off"><span id="effects-label">Effects on</span> <kbd>M</kbd></button>
     </div>
   </header>
 

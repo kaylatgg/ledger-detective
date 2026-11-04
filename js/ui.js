@@ -83,9 +83,12 @@ const UI = {
     const mins = text ? toMinutes(text) : null;
     const from = this._shown;
     this._shown = mins;
-    clearInterval(this._roll);
-    clock.classList.remove("rolling");
-    clock.textContent = hhmm;
+    // A refresh with the same time (pinning evidence, say) lets a roll that's already running finish.
+    if (!(mins === from && clock.classList.contains("rolling"))) {
+      clearInterval(this._roll);
+      clock.classList.remove("rolling");
+      clock.textContent = hhmm;
+    }
     $("#phone-time").textContent = text.replace(/\s*[AP]M$/, ""); // the status bar drops AM/PM, like iOS
     $("#lost").textContent = lostMin ? `−${lostMin} min lost` : "";
     // Clock pressure: losing minutes jolts the clock and plays a sour drop (not when a saved game loads).
@@ -105,11 +108,19 @@ const UI = {
     clock.classList.toggle("late", late);
     if (late) Sound.tickOn();
     else Sound.tickOff();
+    // The score builds with the clock: before 1 AM, 1 to 4 AM, 4 to 8 AM, then the last stretch.
+    if (mins != null) Sound.score(mins < toMinutes("1:00 AM") ? 1 : mins < toMinutes("4:00 AM") ? 2 : mins < toMinutes("8:00 AM") ? 3 : 4);
   },
   // The digits flip forward one step at a time with a click each, then settle with a thud
   // (and a soft chime if an hour passed). Then the HUD says how long is left until the bell.
   rollClock(from, to) {
     const clock = $("#clock");
+    // Less motion asked for: no rolling digits, just the thud, the chime and the time left.
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      Sound.clockSet(Math.floor(from / 60) !== Math.floor(to / 60));
+      this.bellCountdown(to);
+      return;
+    }
     const steps = Math.min(12, to - from);
     let i = 0;
     clock.classList.add("rolling");

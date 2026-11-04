@@ -254,6 +254,7 @@ const Game = {
 
   async beat_ending(b) {
     Sound.tickOff(); // the clock stops ticking once the case is decided
+    Sound.score(0); // and the score fades out
     const key = this.s.flags.ending || "toolate";
     const e = b.endings[key];
     if (!this.s.endingsSeen.includes(key)) this.s.endingsSeen.push(key);
@@ -268,6 +269,7 @@ const Game = {
     const pick = await UI.endingCard(e.title, e.tag, number);
     if (pick === "retry") {
       delete this.s.flags.ending;
+      this.refreshHud(); // back to the last minutes: the score and the clock tick return
       return { jumpTo: b.retry };
     }
   },
@@ -306,12 +308,21 @@ const Game = {
       if ((e.key === "m" || e.key === "M") && !typing) this.toggleMute();
     });
     $("#btn-notebook").onclick = () => this.s && Notebook.open(this);
-    $("#btn-sound").onclick = () => this.toggleMute();
+    $("#btn-ambient").onclick = () => { Sound.setAmbient(!Sound.ambientOn); this.soundLabels(); };
+    $("#btn-effects").onclick = () => { Sound.setEffects(!Sound.effectsOn); this.soundLabels(); };
   },
+  // M: if any sound is on, turn everything off; otherwise turn everything back on.
   toggleMute() {
-    const muted = Sound.toggleMute();
-    $("#sound-label").textContent = muted ? "Sound off" : "Sound on";
-    $("#btn-sound").setAttribute("aria-pressed", String(!muted));
+    const on = !(Sound.ambientOn || Sound.effectsOn);
+    Sound.setAmbient(on);
+    Sound.setEffects(on);
+    this.soundLabels();
+  },
+  soundLabels() {
+    $("#ambient-label").textContent = Sound.ambientOn ? "Ambient on" : "Ambient off";
+    $("#effects-label").textContent = Sound.effectsOn ? "Effects on" : "Effects off";
+    $("#btn-ambient").setAttribute("aria-pressed", String(Sound.ambientOn));
+    $("#btn-effects").setAttribute("aria-pressed", String(Sound.effectsOn));
   },
 };
 
@@ -425,6 +436,7 @@ async function boot() {
 
   const start = (state) => {
     Sound.start();
+    Game.soundLabels(); // show the saved Ambient / Effects choice
     Game.s = state;
     $("#title").hidden = true;
     $("#hud").hidden = false;
