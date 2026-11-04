@@ -259,7 +259,9 @@ const UI = {
       // Spell out how to answer, and what happens if you don't.
       const keys = options.map((_, i) => i + 1);
       const keyText = keys.length > 1 ? `${keys.slice(0, -1).join(", ")} or ${keys[keys.length - 1]}` : "1";
-      $("#choice-help").textContent = `Click an answer or press ${keyText} · If time runs out, that counts as your answer`;
+      $("#choice-help").textContent = seconds
+        ? `Click an answer or press ${keyText} · If time runs out, that counts as your answer`
+        : `Click an answer or press ${keyText} · No time limit`;
       box.style.setProperty("--secs", seconds + "s");
       $("#choice-speaker").textContent = speaker || "";
       $("#choice-prompt").textContent = prompt;
@@ -288,9 +290,10 @@ const UI = {
       box.hidden = false;
       void bar.offsetWidth;
       box.classList.add("on");
+      bar.style.visibility = seconds ? "" : "hidden"; // no timer line when choice timers are off
       bar.style.transition = `transform ${seconds}s linear`;
       bar.style.transform = "scaleX(0)";
-      const timer = setTimeout(() => finish(-1), seconds * 1000);
+      const timer = seconds ? setTimeout(() => finish(-1), seconds * 1000) : null;
       const onKey = (e) => {
         const n = parseInt(e.key, 10);
         if (n >= 1 && n <= options.length) { e.preventDefault(); finish(n - 1); }

@@ -249,6 +249,9 @@ const Terminal = {
     box.append(el("div", "res-count", `${n} row${n === 1 ? "" : "s"}`));
     if (!res.columns.length) return;
     const wrap = el("div", "res-wrap");
+    wrap.tabIndex = 0; // it scrolls, so keyboard players can focus it and use the arrow keys
+    wrap.setAttribute("role", "region");
+    wrap.setAttribute("aria-label", "Query results");
     const table = el("table", "res");
     const head = el("tr");
     res.columns.forEach((c) => head.append(el("th", "", c)));

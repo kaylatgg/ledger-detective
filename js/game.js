@@ -4,6 +4,9 @@ const SAVE_KEY = "ledger-detective-save-v1";
 const DEV = new URLSearchParams(location.search).has("dev");
 const BELL = toMinutes("9:30 AM");
 const MAX_LOST = 45; // hints and mistakes can cost at most this much clock time
+// Accessibility setting for timed choices, remembered in this browser.
+const TIMERS_KEY = "ledger-detective-timers";
+const TIMER_MODES = { normal: "Normal", double: "Double time", off: "Off" };
 
 function toMinutes(t) {
   const m = t.match(/(\d+):(\d+)\s*(AM|PM)/i);
@@ -206,13 +209,17 @@ const Game = {
   },
 
   async beat_choice(b) {
-    const seconds = typeof b.seconds === "function" ? b.seconds(this.s) : b.seconds;
+    let seconds = typeof b.seconds === "function" ? b.seconds(this.s) : b.seconds;
+    const mode = this.timerMode();
+    if (mode === "double") seconds *= 2;
+    if (mode === "off") seconds = 0; // no time limit
     const prompt = typeof b.prompt === "function" ? b.prompt(this.s) : b.prompt;
     if (b.sound) Sound[b.sound]();
     // The hiding scene closes in: heartbeat speeds up, footsteps get closer. Other choices keep a steady heartbeat.
-    const stopTension = b.closeIn ? Sound.tension(seconds) : null;
-    if (!b.closeIn) Sound.heartbeatOn();
-    const i = await UI.choice({ speaker: b.speaker, prompt, options: b.options, seconds, closeIn: !!b.closeIn });
+    const closeIn = !!b.closeIn && seconds > 0;
+    const stopTension = closeIn ? Sound.tension(seconds) : null;
+    if (!closeIn) Sound.heartbeatOn();
+    const i = await UI.choice({ speaker: b.speaker, prompt, options: b.options, seconds, closeIn });
     if (stopTension) stopTension();
     Sound.heartbeatOff();
 
@@ -308,8 +315,25 @@ const Game = {
       if ((e.key === "m" || e.key === "M") && !typing) this.toggleMute();
     });
     $("#btn-notebook").onclick = () => this.s && Notebook.open(this);
+    $("#btn-timers").onclick = $("#nb-timers").onclick = () => this.cycleTimers();
     $("#btn-ambient").onclick = () => { Sound.setAmbient(!Sound.ambientOn); this.soundLabels(); };
     $("#btn-effects").onclick = () => { Sound.setEffects(!Sound.effectsOn); this.soundLabels(); };
+  },
+  timerMode() {
+    try { const m = localStorage.getItem(TIMERS_KEY); return TIMER_MODES[m] ? m : "normal"; } catch (e) { return "normal"; }
+  },
+  // Normal -> Double time -> Off -> Normal
+  cycleTimers() {
+    const keys = Object.keys(TIMER_MODES);
+    const next = keys[(keys.indexOf(this.timerMode()) + 1) % keys.length];
+    try { localStorage.setItem(TIMERS_KEY, next); } catch (e) { /* storage blocked: timers stay normal */ }
+    this.timerLabels();
+    UI.toast(next === "off" ? "Choice timers off: take as long as you need" : next === "double" ? "Choice timers: double time" : "Choice timers: normal");
+  },
+  timerLabels() {
+    const name = TIMER_MODES[this.timerMode()];
+    $("#btn-timers").textContent = "Choice timers: " + name;
+    $("#nb-timers").textContent = "Timers: " + name;
   },
   // M: if any sound is on, turn everything off; otherwise turn everything back on.
   toggleMute() {
@@ -420,6 +444,7 @@ const Summary = {
 // ---------- start-up ----------
 async function boot() {
   Game.bindKeys();
+  Game.timerLabels();
   const status = $("#title-status");
   try {
     await DB.init();

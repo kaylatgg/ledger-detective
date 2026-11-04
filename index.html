@@ -11,7 +11,7 @@
   <script>
     // Cache-busting: fresh files on every reload while developing locally, a fixed version when published.
     // RELEASE: bump this every time you publish an update, so players get the new files instead of old cached ones.
-    const RELEASE = "2026-11-03-4";
+    const RELEASE = "2026-11-04-1";
     window.ASSET_V = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === "file:" ? String(Date.now()) : RELEASE;
     (() => {
       const link = document.createElement("link");
@@ -135,7 +135,7 @@
 
   <!-- Chapter card -->
   <div id="chapter" hidden>
-    <div id="chapter-title"></div>
+    <div id="chapter-title" role="heading" aria-level="2"></div>
     <div id="chapter-sub"></div>
     <span id="chapter-more" class="bar-help blink" hidden>Click or press Space to continue</span>
   </div>
@@ -186,7 +186,7 @@
             </div>
           </div>
 
-          <div id="term-status"></div>
+          <div id="term-status" role="status" aria-live="polite"></div>
           <div id="term-results"></div>
 
           <div id="term-success" hidden>
@@ -260,7 +260,7 @@
   <dialog id="notebook" aria-label="Case notebook">
     <div class="nb-head">
       <h2>Case notebook</h2>
-      <form method="dialog"><button type="submit">Close <kbd>Esc</kbd></button></form>
+      <form method="dialog"><button id="nb-timers" type="button" title="Timed choices: normal, double time, or no time limit">Timers: Normal</button><button type="submit">Close <kbd>Esc</kbd></button></form>
     </div>
     <section class="nb-people" aria-labelledby="nb-people-title">
       <h3 id="nb-people-title">Who's who</h3>
@@ -344,6 +344,7 @@
         <button id="btn-new" class="btn-primary" type="button" disabled>Begin the shift</button>
         <button id="btn-continue" type="button" hidden>Continue</button>
       </div>
+      <p class="title-settings"><button id="btn-timers" type="button" title="Timed choices: normal, double time, or no time limit">Choice timers: Normal</button></p>
       <p id="title-status">Loading…</p>
     </div>
     <div class="title-count">
