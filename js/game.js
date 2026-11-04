@@ -340,7 +340,7 @@ const Summary = {
       tr.append(el("td", "", b.title));
       if (!st) { tr.append(el("td", "", "—"), el("td", "", "—"), el("td", "", "not played")); rows.append(tr); continue; }
       tr.append(el("td", "num", String(st.attempts)), el("td", "num", String(st.hints)));
-      tr.append(el("td", "", st.skipped ? "skipped" : st.solved ? (st.firstTry ? "first try" : "solved") : b.type === "predict" ? "wrong guess" : "—"));
+      tr.append(el("td", "", st.skipped ? "skipped" : st.solved ? (st.answerShown ? "solved with the answer shown" : st.firstTry ? "first try" : "solved") : b.type === "predict" ? "wrong guess" : "—"));
       rows.append(tr);
     }
     const fmt = (c) => (!c ? "not attempted" : c.skipped ? "skipped (didn't know yet)" : c.solved ? `solved in ${c.attempts} ${c.attempts === 1 ? "try" : "tries"}` : `not solved (${c.attempts} tries)`);
@@ -409,7 +409,7 @@ const Summary = {
       const st = s.stats[b.id];
       if (!st) continue;
       const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
-      lines.push(`${b.title}: ${plural(st.attempts, "try").replace("trys", "tries")}, ${plural(st.hints, "hint")}${st.skipped ? ", skipped" : ""}`);
+      lines.push(`${b.title}: ${plural(st.attempts, "try").replace("trys", "tries")}, ${plural(st.hints, "hint")}${st.answerShown ? ", answer shown" : ""}${st.skipped ? ", skipped" : ""}`);
       for (const m of [...new Set(st.mistakes)]) lines.push("   mistake: " + m);
     }
     lines.push("", "Endings: " + $("#summary-endings").textContent, "Time played: " + $("#summary-time").textContent);

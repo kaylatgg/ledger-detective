@@ -553,6 +553,7 @@ table.res td.num { text-align: right; color: var(--signal-soft); }
 .feed-msg::before { display: block; margin-bottom: 4px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; }
 .feed-msg.warn::before { content: "Check this"; color: var(--alarm); }
 .feed-msg.hint::before { content: "Hint"; color: var(--signal); }
+.feed-msg.hint.answer::before { content: "Answer"; }
 .feed-msg.hint { font-family: var(--mono); font-size: 13px; white-space: pre-line; }
 .feed-msg.pulse { animation: feed-pulse 0.5s ease-out; }
 @keyframes feed-pulse { 0% { background: rgba(236, 232, 225, 0.12); } 100% { background: transparent; } }

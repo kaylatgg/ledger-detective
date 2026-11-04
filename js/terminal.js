@@ -28,10 +28,12 @@ const Terminal = {
 
       const hintBtn = $("#term-hint");
       const hints = b.challenge ? [] : b.hints || [];
+      let answerShown = false; // after the last hint, the button offers the whole query, so nobody gets stuck
       const setHintLabel = () => {
         hintBtn.hidden = !hints.length;
-        if (hintLevel >= hints.length) { hintBtn.textContent = "No more hints"; hintBtn.disabled = true; return; }
         hintBtn.disabled = false;
+        if (answerShown) { hintBtn.textContent = "Answer shown"; hintBtn.disabled = true; return; }
+        if (hintLevel >= hints.length) { hintBtn.textContent = `Show the answer (−${HINT_COST} min)`; return; }
         hintBtn.textContent = hintLevel === 0 ? "Hint (free)" : `Another hint (−${HINT_COST} min)`;
       };
       setHintLabel();
@@ -123,7 +125,17 @@ const Terminal = {
       };
       $("#term-run").onclick = run;
       hintBtn.onclick = () => {
-        if (hintLevel >= hints.length) return;
+        if (answerShown) return;
+        if (hintLevel >= hints.length) {
+          // Still stuck after every hint: show the whole query. Pasting stays off, so they still type it themselves.
+          game.loseTime(HINT_COST);
+          say("Here's the whole query. Type it in yourself, then run it:\n" + b.answer + ";", "hint answer");
+          answerShown = true;
+          st.answerShown = true;
+          setHintLabel();
+          input.focus();
+          return;
+        }
         if (hintLevel > 0) game.loseTime(HINT_COST);
         say(hints[hintLevel], "hint");
         hintLevel++;
