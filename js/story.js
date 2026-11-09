@@ -99,6 +99,7 @@ const STORY = [
   {
     type: "query", id: "s1", label: "Scene 1 · {time}", title: "Open the trade records",
     question: "Show everything in the trades table.",
+    guide: "Your first query. In the box, replace the ___ with the table's name. Tables are listed on the left, and you can click a name to type it. Then press Enter to run it. Stuck? Press Hint. The first one is free.",
     template: "SELECT * FROM ___;",
     tool: ["SELECT says what to show. * means every column.", "FROM says which table to look in."],
     answer: "SELECT * FROM trades",
@@ -113,6 +114,7 @@ const STORY = [
   {
     type: "query", id: "s2", label: "Scene 2 · {time}", time: "12:10 AM", title: "Only what matters",
     question: "Too much noise. Show only two columns: trader and amount.",
+    guide: "Replace each ___ with a column name. Columns are the orange names under each table on the left. Under the box, the game reads your query back in plain English as you type.",
     template: "SELECT ___, ___ FROM trades;",
     tool: ["List the columns you want after SELECT.", "Put a comma between them."],
     answer: "SELECT trader, amount FROM trades",
@@ -138,6 +140,7 @@ const STORY = [
   {
     type: "query", id: "s3", label: "Scene 3 · {time}", time: "12:30 AM", title: "The error account",
     question: "Show every column, but only for trades in the error account.",
+    guide: "No starting query this time. Type the whole thing, using the shape under the question as your guide. The sticky note on the left explains the new word, WHERE.",
     keywords: "SELECT * FROM trades WHERE …",
     tool: ["WHERE keeps only the rows that match.", "Text values go in single quotes: WHERE stock = 'NOVA'"],
     answer: "SELECT * FROM trades WHERE account = 'error'",
@@ -227,6 +230,7 @@ const STORY = [
   {
     type: "query", id: "s5", label: "Scene 5 · {time}", time: "1:50 AM", title: "The biggest five",
     question: "Show the trader, amount and time of the 5 biggest error-account trades, biggest first.",
+    guide: "From here on, the box starts empty. The sticky note on the left shows the new words and the order the parts go in. Run your query as often as you like: wrong answers don't cost time, only hints do.",
     tool: ["ORDER BY amount sorts the rows. Add DESC for biggest first.", "LIMIT 5 keeps only the first 5 rows.", "Order: SELECT … FROM … WHERE … ORDER BY … LIMIT"],
     answer: "SELECT trader, amount, time FROM trades WHERE account = 'error' ORDER BY amount DESC LIMIT 5",
     orderBy: 1,

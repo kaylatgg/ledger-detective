@@ -57,7 +57,8 @@ const Terminal = {
         feed.append(m);
         m.scrollIntoView({ block: "nearest" });
       };
-      if (b.challenge === "before") say("No hints for this one. Just try. It's fine to skip.");
+      if (b.guide) say(b.guide, "guide"); // first-time guidance, as each new idea comes up
+      if (b.challenge === "before") say("A quick check of what you know before the night starts. No hints. Never written SQL? Press \"I don't know yet\". You'll get the same question at the end of the night.");
       if (b.challenge === "after") say("Same question as before. No hints.");
 
       const finish = (outcome) => {
@@ -164,7 +165,7 @@ const Terminal = {
       $("#feed-title").textContent = "Unknown";
       $("#term-feed").innerHTML = "";
       $("#predict-code").textContent = b.query;
-      $("#predict-question").textContent = b.question;
+      $("#predict-question").textContent = "Click your answer:";
       const opts = $("#predict-options");
       opts.innerHTML = "";
       const after = $("#predict-after");

@@ -11,7 +11,7 @@
   <script>
     // Cache-busting: fresh files on every reload while developing locally, a fixed version when published.
     // RELEASE: bump this every time you publish an update, so players get the new files instead of old cached ones.
-    const RELEASE = "2026-11-09-1";
+    const RELEASE = "2026-11-09-2";
     window.ASSET_V = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === "file:" ? String(Date.now()) : RELEASE;
     (() => {
       const link = document.createElement("link");
@@ -42,8 +42,8 @@
     <div class="bar bar-bottom" aria-hidden="true"></div>
     <div id="subtitle" aria-live="polite">
       <p id="sub-text"></p>
-      <span id="sub-more" hidden>Click or press Space to continue</span>
     </div>
+    <span id="sub-more" hidden>Click or press Space to continue</span>
     <button id="search-leave" class="btn-primary" type="button" hidden></button>
     <p id="search-help" class="bar-help" hidden></p>
   </div>
@@ -166,7 +166,7 @@
           <div id="term-editor">
             <div class="editor">
               <span class="prompt">&gt;</span>
-              <textarea id="term-input" rows="4" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Type your SQL query"></textarea>
+              <textarea id="term-input" rows="4" placeholder="Type your SQL query here, then press Enter" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Type your SQL query"></textarea>
             </div>
             <div id="term-translate" aria-label="Your query in plain English"></div>
             <div class="term-actions">

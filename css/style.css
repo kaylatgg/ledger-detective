@@ -466,10 +466,10 @@ body.term-open .term-feed { padding-bottom: 120px; scroll-padding-bottom: 120px;
 .term-side h3, .term-feed h3 { margin: 0 0 12px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ash); font-weight: 500; }
 .tbl { margin-bottom: 14px; }
 /* Table names are buttons like the columns, written exactly as they get typed */
-.tbl-name { display: block; min-height: 28px; margin: 0 0 2px -6px; padding: 2px 6px; border: 0; background: none; font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--table); text-align: left; }
+.tbl-name { display: block; width: fit-content; min-height: 28px; margin: 0 0 2px -6px; padding: 2px 6px; border: 0; border-radius: 3px; background: color-mix(in srgb, var(--table) 10%, transparent); font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--table); text-align: left; }
 .tbl-name:hover { background: var(--table); color: var(--ink); }
 .tbl-cols { display: flex; flex-wrap: wrap; gap: 2px 4px; }
-.col { min-height: 28px; padding: 2px 6px; font-family: var(--mono); font-size: 14px; border: 0; background: none; color: var(--signal-soft); }
+.col { min-height: 28px; padding: 2px 6px; font-family: var(--mono); font-size: 14px; border: 0; border-radius: 3px; background: color-mix(in srgb, var(--signal-soft) 10%, transparent); color: var(--signal-soft); }
 .col:hover:not(:disabled) { background: var(--signal); color: var(--ink); }
 .side-tip { font-size: 14px; color: var(--ash); margin: 0 0 16px; }
 .lesson-btn { width: 100%; margin: 0 0 16px; min-height: 36px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
@@ -553,6 +553,7 @@ table.res td.num { text-align: right; color: var(--signal-soft); }
 .feed-msg::before { display: block; margin-bottom: 4px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; }
 .feed-msg.warn::before { content: "Check this"; color: var(--alarm); }
 .feed-msg.hint::before { content: "Hint"; color: var(--signal); }
+.feed-msg.guide::before { content: "How to"; color: var(--table); }
 .feed-msg.hint.answer::before { content: "Answer"; }
 .feed-msg.hint { font-family: var(--mono); font-size: 14px; white-space: pre-line; }
 .feed-msg.pulse { animation: feed-pulse 0.5s ease-out; }
