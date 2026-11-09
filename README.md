@@ -49,7 +49,7 @@ Your progress saves automatically in your browser, so you can close the tab and 
 
 ## What you'll learn
 
-No coding experience needed. A short interactive lesson shows how a query works, and every query you type is translated into plain English as you write it.
+No coding experience needed. A short interactive lesson shows how a query works, and every query you type is translated into plain English as you write it. The first few scenes walk you through where to type and what to do, then step back as you get the hang of it.
 
 | Skill | What it does |
 | --- | --- |
@@ -62,12 +62,14 @@ No coding experience needed. A short interactive lesson shows how a query works,
 
 When a query is wrong, the game explains the specific mistake in plain words, such as a missing comma, missing quotes or the wrong order, instead of just saying "error". You answer the same skills check at the start and the end of the night, so you can see how far you came.
 
+The full learning goals sheet, covering who the game is for, what they'll learn and which scene teaches each skill, is in [LEARNING-GOALS.md](LEARNING-GOALS.md).
+
 ## Features
 
 - **Four endings**, decided by what you find and the choices you make
 - **A case notebook** that fills in as each person enters the story
 - **Evidence you pin yourself**, in your own words, then send to the FBI in a final report
-- **A clock you can hear**: it rolls forward as the night goes on, chimes on the hour, and costs you minutes for hints and mistakes
+- **A clock you can hear**: it rolls forward as the night goes on, chimes on the hour, and costs you minutes for extra hints and risky choices
 - **A score that builds through the night**, generated live in the browser
 - **An end screen that shows what you learned**: your before and after answers, every skill you used, and the mistakes you fixed
 
