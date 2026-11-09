@@ -453,7 +453,7 @@ async function boot() {
     console.error(e);
     return;
   }
-  status.textContent = "Best with headphones · about 30 minutes";
+  status.textContent = "No coding experience needed · about 30 minutes · best with headphones";
   const saved = Game.loadSave();
   const cont = $("#btn-continue");
   cont.hidden = !(saved && saved.i > 0 && saved.i < STORY.length);

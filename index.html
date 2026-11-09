@@ -11,7 +11,7 @@
   <script>
     // Cache-busting: fresh files on every reload while developing locally, a fixed version when published.
     // RELEASE: bump this every time you publish an update, so players get the new files instead of old cached ones.
-    const RELEASE = "2026-11-04-1";
+    const RELEASE = "2026-11-09-1";
     window.ASSET_V = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === "file:" ? String(Date.now()) : RELEASE;
     (() => {
       const link = document.createElement("link");
@@ -338,8 +338,13 @@
       <h1>Ledger<br>Detective</h1>
       <div class="title-line">
         <span class="title-sub">Night Shift</span>
-        <p class="title-pitch">Someone is hiding millions in the books. The only way to prove who is to write the SQL yourself.</p>
+        <p class="title-pitch">You're a junior analyst at an investment fund, secretly helping the FBI. Someone on your floor is hiding millions in losses. You have until the market opens to find out who.</p>
       </div>
+      <ul class="title-brief">
+        <li><b>Write real SQL</b>Type your own queries to pull, filter, sort and total the fund's trades.</li>
+        <li><b>Learn as you go</b>Get a query wrong and the game tells you exactly what to fix.</li>
+        <li><b>Choose carefully</b>Your choices decide which of four endings you reach.</li>
+      </ul>
       <div class="title-actions">
         <button id="btn-new" class="btn-primary" type="button" disabled>Begin the shift</button>
         <button id="btn-continue" type="button" hidden>Continue</button>
